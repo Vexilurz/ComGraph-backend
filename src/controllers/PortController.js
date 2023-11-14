@@ -1,7 +1,10 @@
+import PortService from "../services/PortService.js";
+
 class PortController {
   async getExisting(req, res) {
     try {
-      res.json('okok')
+      const ports = await PortService.getExisting()
+      res.json(ports)
     } catch (e) {
       res.status(500).json(e)
     }
@@ -10,7 +13,7 @@ class PortController {
   async getByName(req, res) {
     try {
       const {name} = req.params
-      res.json(`okok: ${name}`)
+      res.json(PortService.getByName(name))
     } catch (e) {
       res.status(500).json(e)
     }
@@ -19,10 +22,7 @@ class PortController {
   async connect(req, res) {
     try {
       const {name} = req.body
-      if (name !== undefined)
-        res.json(`connect: ${name}`)
-      else
-        throw "no name"
+      res.json(PortService.connect(name))
     } catch (e) {
       res.status(500).json(e)
     }
