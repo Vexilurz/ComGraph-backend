@@ -6,6 +6,7 @@ const PORT = 11148
 const app = express()
 
 app.use(express.json())
+app.use(express.static('static'))
 app.use('/api', router)
 
 async function startApp() {
