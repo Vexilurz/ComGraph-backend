@@ -1,5 +1,5 @@
 import {Module} from "@nestjs/common";
-import { PortsModule } from './ports/ports.module';
+import { PortModule } from './port/port.module';
 import {ConfigModule} from "@nestjs/config";
 
 @Module({
@@ -9,7 +9,7 @@ import {ConfigModule} from "@nestjs/config";
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`
     }),
-    PortsModule
+    PortModule
   ]
 })
 export class AppModule {
