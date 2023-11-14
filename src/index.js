@@ -1,18 +1,19 @@
 import express from 'express'
+import router from "./router.js";
 
-const PORT = 11148;
+const PORT = 11148
 
-const app = express();
+const app = express()
 
-app.use(express.json());
+app.use(express.json())
+app.use('/api', router)
 
-app.get('/', (req, res) => {
-  console.log(req.query);
-  res.status(200).json('ComGraph server working')
-})
-app.post('/post', (req, res) => {
-  console.log(req.body);
-  res.status(200).json('ok')
-})
+async function startApp() {
+  try {
+    app.listen(PORT, () => console.log(`ComGraph server started on port ${PORT}`))
+  } catch (e) {
+    console.log(e)
+  }
+}
 
-app.listen(PORT, () => console.log(`ComGraph server started on port ${PORT}`))
+await startApp()
