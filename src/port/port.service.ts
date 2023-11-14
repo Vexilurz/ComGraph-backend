@@ -7,6 +7,10 @@ export class PortService {
     return ['COM1', 'COM2']
   }
 
+  async getPort(name: string) {
+    return `Status of ${name}`
+  }
+
   async connect(dto: PortSettingsDto) {
     // TODO: connect to port
     return `Connected to ${dto.name} ${dto.baudrate}`

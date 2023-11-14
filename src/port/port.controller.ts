@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Post} from '@nestjs/common';
+import {Body, Controller, Get, Param, Post} from '@nestjs/common';
 import {PortService} from "./port.service";
 import {PortSettingsDto} from "./dto/port-settings.dto";
 
@@ -7,9 +7,15 @@ export class PortController {
   constructor(private portsService: PortService) {}
 
   @Get('/existing')
-  async getPorts() {
+  async getExisting() {
     const ports = await this.portsService.getExisting()
     return ports
+  }
+
+  @Get('/:name')
+  async getPort(@Param('name') name: string) {
+    const port = await this.portsService.getPort(name)
+    return port
   }
 
   @Post('/connect')
