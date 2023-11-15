@@ -11,10 +11,11 @@ export class FilesService {
       if (!fs.existsSync(filePath)) {
         fs.mkdirSync(filePath, {recursive: true})
       }
+      // TODO: writeFile
       fs.writeFileSync(path.join(filePath, fileName), file.buffer)
       return fileName
     } catch (e) {
-      throw new HttpException('File write error', HttpStatus.INTERNAL_SERVER_ERROR)
+      throw new HttpException(`createFile error: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 }
