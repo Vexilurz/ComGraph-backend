@@ -1,4 +1,4 @@
 export class PortSettingsDto {
-  readonly name: string;
-  readonly baudrate: number
+  readonly path: string;
+  readonly baudRate: number
 }

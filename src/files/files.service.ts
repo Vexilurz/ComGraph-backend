@@ -15,7 +15,7 @@ export class FilesService {
       fs.writeFileSync(path.join(filePath, fileName), file.buffer)
       return fileName
     } catch (e) {
-      throw new HttpException(`createFile error: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR)
+      throw new Error(`FilesService.createFile error: ${e.message}`)
     }
   }
 }

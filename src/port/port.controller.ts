@@ -1,4 +1,4 @@
-import {Body, Controller, Get, Param, Post} from '@nestjs/common';
+import {Body, Controller, Get, HttpException, HttpStatus, Param, Post} from '@nestjs/common';
 import {PortService} from "./port.service";
 import {PortSettingsDto} from "./dto/port-settings.dto";
 
@@ -6,21 +6,23 @@ import {PortSettingsDto} from "./dto/port-settings.dto";
 export class PortController {
   constructor(private portsService: PortService) {}
 
-  @Get('/existing')
-  async getExisting() {
-    const ports = await this.portsService.getExisting()
-    return ports
-  }
-
-  @Get('/:name')
-  async getPort(@Param('name') name: string) {
-    const port = await this.portsService.getPort(name)
-    return port
+  @Get('/list')
+  async getList() {
+    try {
+      const ports = await this.portsService.getList()
+      return ports
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
   }
 
   @Post('/connect')
   async connect(@Body() portDTO: PortSettingsDto) {
-    const res = await this.portsService.connect(portDTO)
-    return res
+    try {
+      const res = await this.portsService.connect(portDTO)
+      return res
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
   }
 }
