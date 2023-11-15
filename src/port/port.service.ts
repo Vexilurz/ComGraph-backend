@@ -14,16 +14,19 @@ export class PortService {
       const ports = await SerialPort.list()
       return ports
     } catch (e) {
-      throw new Error(`PortService.getExisting error: ${e.message}`)
+      throw e
     }
   }
 
-  _disconnect(port: SerialPort) {
+  disconnect() {
     return new Promise((resolve, reject) => {
       if (!this._port?.isOpen)
         resolve(true)
-      port.close((err) => {
-        resolve(err ? err : true)
+      this._port.close((err) => {
+        if (err)
+          reject(err)
+        else
+          resolve(true)
       });
     });
   }
@@ -31,7 +34,7 @@ export class PortService {
   async connect(dto: PortSettingsDto) {
     try {
       const {path, baudRate} = dto
-      await this._disconnect(this._port)
+      await this.disconnect()
       this._port = new SerialPort({path, baudRate})
       return new Promise((resolve, reject) => {
         this._port.on('open', () => {
@@ -42,7 +45,7 @@ export class PortService {
         });
       });
     } catch (e) {
-      throw new Error(`PortService.connect error: ${e.message}`)
+      throw e
     }
   }
 

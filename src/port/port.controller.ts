@@ -25,4 +25,14 @@ export class PortController {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+
+  @Get('/disconnect')
+  async disconnect() {
+    try {
+      const res = await this.portsService.disconnect()
+      return res
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
 }
