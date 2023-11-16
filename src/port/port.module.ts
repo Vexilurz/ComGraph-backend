@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
 import { PortController } from './port.controller';
 import { PortService } from './port.service';
-import {FilesModule} from "../files/files.module";
+import {DataModule} from "../data/data.module";
 
 @Module({
   controllers: [PortController],
   providers: [PortService],
+  exports: [PortService],
   imports: [
-    FilesModule
+    DataModule
   ]
 })
 export class PortModule {}

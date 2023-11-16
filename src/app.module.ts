@@ -2,6 +2,8 @@ import {Module} from "@nestjs/common";
 import { PortModule } from './port/port.module';
 import {ConfigModule} from "@nestjs/config";
 import {ServeStaticModule} from "@nestjs/serve-static";
+import { ProtocolModule } from './protocol/protocol.module';
+import { DataModule } from './data/data.module';
 import * as path from 'path';
 
 @Module({
@@ -14,7 +16,9 @@ import * as path from 'path';
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`
     }),
-    PortModule
+    PortModule,
+    ProtocolModule,
+    DataModule
   ]
 })
 export class AppModule {
