@@ -1,6 +1,7 @@
-import {Body, Controller, Get, HttpException, HttpStatus, Param, Post} from '@nestjs/common';
+import {Body, Controller, Get, HttpException, HttpStatus, Post} from '@nestjs/common';
 import {PortService} from "./port.service";
 import {PortSettingsDto} from "./dto/port-settings.dto";
+import {ProtocolSettingsDto} from "./dto/protocol-settings.dto";
 
 @Controller('/port')
 export class PortController {
@@ -9,18 +10,16 @@ export class PortController {
   @Get('/list')
   async getList() {
     try {
-      const ports = await this.portsService.getList()
-      return ports
+      return await this.portsService.getList()
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 
   @Post('/connect')
-  async connect(@Body() portDTO: PortSettingsDto) {
+  async connect(@Body() dto: PortSettingsDto) {
     try {
-      const res = await this.portsService.connect(portDTO)
-      return res
+      return await this.portsService.connect(dto)
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -29,8 +28,30 @@ export class PortController {
   @Get('/disconnect')
   async disconnect() {
     try {
-      const res = await this.portsService.disconnect()
-      return res
+      return await this.portsService.disconnect()
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
+
+  @Post('/settings')
+  settings(@Body() dto: ProtocolSettingsDto) {
+    try {
+      return this.portsService.setProtocolSettings(dto)
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  @Get('/errors')
+  getErrors() {
+    return this.portsService.getErrors()
+  }
+
+  @Get('/once')
+  async getOnce() {
+    try {
+      return await this.portsService.getOnce()
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
