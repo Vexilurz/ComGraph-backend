@@ -5,7 +5,7 @@ import {FilesService} from "../files/files.service";
 export class DataService {
   constructor(private fileService: FilesService) {}
 
-  private dataBuffer = []
+  private dataBuffer: Array<number> = []
 
   onDataReceived = (data: Buffer) => {
     console.log('data:', data.length, data)

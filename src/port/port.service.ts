@@ -14,10 +14,6 @@ export class PortService {
     return await SerialPort.list()
   }
 
-  isConnected = () => {
-    return this.port?.isOpen
-  }
-
   getErrors = () => {
     const errors = this.portErrors
     this.portErrors = []
@@ -26,7 +22,7 @@ export class PortService {
 
   disconnect() {
     return new Promise((resolve, reject) => {
-      if (!this.isConnected()) resolve('Port was not open...')
+      if (!this.port?.isOpen) resolve('Port was not open...')
       this.port.close((err) => {
         if (err) reject(err)
         this.port = undefined
@@ -55,7 +51,7 @@ export class PortService {
 
   sendData(data: Array<number>) {
     return new Promise((resolve, reject) => {
-      if (!this.isConnected()) reject(new Error('Not connected to the port'))
+      if (!this.port?.isOpen) reject(new Error('Not connected to the port'))
       this.port.write(data, (err) => {
         if (err) reject(err)
         resolve('Request sent...')
