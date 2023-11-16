@@ -18,7 +18,8 @@ export class PortController {
   @Post('/connect')
   async connect(@Body() dto: PortSettingsDto) {
     try {
-      return await this.portsService.connect(dto)
+      await this.portsService.connect(dto)
+      return `Connected to ${dto.path}`
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -27,7 +28,8 @@ export class PortController {
   @Get('/disconnect')
   async disconnect() {
     try {
-      return await this.portsService.disconnect()
+      await this.portsService.disconnect()
+      return 'Disconnected.'
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }

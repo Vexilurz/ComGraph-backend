@@ -20,13 +20,13 @@ export class PortService {
     return errors
   }
 
-  disconnect() {
+  disconnect(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (!this.port?.isOpen) resolve('Port was not open...')
       this.port.close((err) => {
         if (err) reject(err)
         this.port = undefined
-        resolve('Disconnected.')
+        resolve(true)
       });
     });
   }
@@ -41,20 +41,20 @@ export class PortService {
       const date = (new Date(Date.now())).toUTCString()
       this.portErrors.push({message, date})
     });
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this.port.open((err) => {
         if (err) reject(err)
-        resolve(`Connected to ${path}`)
+        resolve(true)
       })
     });
   }
 
-  sendData(data: Array<number>) {
+  sendData(data: Array<number>): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (!this.port?.isOpen) reject(new Error('Not connected to the port'))
       this.port.write(data, (err) => {
         if (err) reject(err)
-        resolve('Request sent...')
+        resolve(true)
       })
     })
   }
