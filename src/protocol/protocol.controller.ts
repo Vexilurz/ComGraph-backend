@@ -26,6 +26,10 @@ export class ProtocolController {
 
   @Get('/cycle?')
   async cycleRequest(@Query('enable') enable: string) {
-    return await this.protocolService.setCycleRequest(enable === "true")
+    try {
+      return await this.protocolService.setCycleRequest(enable === "true")
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
   }
 }

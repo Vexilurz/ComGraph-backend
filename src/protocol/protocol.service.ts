@@ -49,11 +49,7 @@ export class ProtocolService {
   }
 
   private async sendRequest() {
-    try {
-      await this.portService.sendData([this.settings.command])
-    } catch (e) {
-      this.addError(e.message)
-    }
+    await this.portService.sendData([this.settings.command])
   }
 
   private async oneRequest() {
@@ -66,12 +62,10 @@ export class ProtocolService {
         this.settings.timeout
       )
     } catch (e) {
-      const len = getLen()
-      // this.dataService.dataBuffer.splice(-len)
-      let {message} = e
       if (e.name == 'TimeoutError')
-        message += `. Expected length ${this.expectedLength}, but received only ${len}.`
-      this.addError(message)
+        this.addError(`Timeout. Expected length ${this.expectedLength}, but received only ${getLen()}.`)
+      else
+        throw e
     }
     return {
       receivedLength: getLen(),
@@ -91,7 +85,11 @@ export class ProtocolService {
 
   private async cycleRequest({enable}) {
     if (!enable) return;
-    console.log(await this.oneRequest())
+    try {
+      console.log(await this.oneRequest())
+    } catch (e) {
+      this.addError(e.message)
+    }
     try {
       setTimeout(async () => await this.cycleRequest(this.cycle), this.settings.cycleRequestFreq)
     } catch (e) {
