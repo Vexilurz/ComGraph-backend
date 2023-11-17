@@ -13,7 +13,7 @@ export class ProtocolService {
 
   private settings: ProtocolSettingsDto
   private expectedLength: number
-  private isGetOnce = false
+  private cycle = {enable: false}
 
   setSettings(dto: ProtocolSettingsDto) {
     if (!dto.command) throw new Error(`Command field is undefined`)
@@ -23,21 +23,50 @@ export class ProtocolService {
     return this.settings
   }
 
-  async getOnce() {
-    this.isGetOnce = true
-    this.dataService.dataBuffer = []
-    await this.portService.sendData([this.settings.command]) // Request sent...
+  private async sendRequest() {
+    await this.portService.sendData([this.settings.command])
+  }
+
+  private async oneRequest() {
+    const prevLength = this.dataService.dataBuffer.length;
+    const getLen = () => {return this.dataService.dataBuffer.length - prevLength}
+    await this.sendRequest() // TODO: catch error when settings not initialized
     try {
       await waitUntil(
-        () => this.dataService.dataBuffer.length >= this.expectedLength,
+        () => getLen() >= this.expectedLength,
         this.settings.timeout
       )
     } catch (e) {
-      throw new Error(`Request timeout. Expected buffer length: ${this.expectedLength}, current buffer length: ${this.dataService.dataBuffer.length}.`)
+      const len = getLen()
+      this.dataService.dataBuffer.splice(-len)
+      throw new Error(`Request timeout. Expected length ${this.expectedLength}, but received only ${len}.`)
     }
     return {
-      data: this.dataService.dataBuffer.splice(0, this.expectedLength),
-      extraBytesInBuffer: this.dataService.dataBuffer.length
+      received: getLen(),
+      prevLength,
+      currentLength: this.dataService.dataBuffer.length
     }
+  }
+
+  async getOnce() {
+    this.dataService.dataBuffer = []
+    await this.oneRequest()
+    const data = this.dataService.dataBuffer.splice(0, this.expectedLength)
+    return {
+      data,
+      bufferLength: this.dataService.dataBuffer.length
+    }
+  }
+
+  setCycleRequest(enable: boolean) {
+    this.cycle.enable = enable
+    if (enable) this.cycleRequest(this.cycle)
+    return this.cycle.enable
+  }
+
+  private async cycleRequest({enable}) {
+    if (!enable) return;
+    console.log(await this.oneRequest())
+    setTimeout(async () => await this.cycleRequest(this.cycle), this.settings.cycleRequestFreq)
   }
 }

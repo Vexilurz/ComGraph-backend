@@ -1,4 +1,4 @@
-import {Body, Controller, Get, HttpException, HttpStatus, Post} from '@nestjs/common';
+import {Body, Controller, Get, HttpException, HttpStatus, Post, Query} from '@nestjs/common';
 import {ProtocolService} from "./protocol.service";
 import {ProtocolSettingsDto} from "./dto/protocol-settings.dto";
 
@@ -22,5 +22,10 @@ export class ProtocolController {
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
+  }
+
+  @Get('/cycle?')
+  cycleRequest(@Query('enable') enable: string) {
+    return this.protocolService.setCycleRequest(enable === "true")
   }
 }

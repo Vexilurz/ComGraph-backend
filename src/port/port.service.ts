@@ -22,7 +22,7 @@ export class PortService {
 
   disconnect(): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      if (!this.port?.isOpen) resolve('Port was not open...')
+      if (!this.port?.isOpen) resolve(true)
       this.port.close((err) => {
         if (err) reject(err)
         this.port = undefined
