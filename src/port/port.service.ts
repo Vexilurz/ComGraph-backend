@@ -2,22 +2,31 @@ import {Injectable} from '@nestjs/common';
 import {PortSettingsDto} from "./dto/port-settings.dto";
 import {SerialPort} from 'serialport';
 import {DataService} from "../data/data.service";
+import {ErrorsService} from "../errors/errors.service";
 
 @Injectable()
 export class PortService {
-  private port: SerialPort
-  private portErrors = []
+  constructor(
+    private dataService: DataService,
+    private errorsService: ErrorsService
+  ) {}
 
-  constructor(private dataService: DataService) {}
+  private port: SerialPort
+
+  private addError(message: string) {
+    this.errorsService.addError('SerialPort: '+message)
+  }
 
   async getList() {
     return await SerialPort.list()
   }
 
-  getErrors = () => {
-    const errors = this.portErrors
-    this.portErrors = []
-    return errors
+  getStatus = () => {
+    return {
+      path: this.port?.path,
+      baudRate: this.port?.baudRate,
+      isOpen: this.port?.isOpen
+    }
   }
 
   disconnect(): Promise<boolean> {
@@ -38,8 +47,7 @@ export class PortService {
     this.port.on('data', this.dataService.onDataReceived)
     this.port.on('error', (err) => {
       const {message} = err
-      const date = (new Date(Date.now())).toUTCString()
-      this.portErrors.push({message, date})
+      this.addError(message)
     });
     return new Promise((resolve, reject) => {
       this.port.open((err) => {

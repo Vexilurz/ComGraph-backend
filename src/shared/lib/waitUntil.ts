@@ -1,3 +1,5 @@
+import {TimeoutError} from "../types/TimeoutError";
+
 export function waitUntil(
   condition: () => boolean,
   timeout: number,
@@ -10,7 +12,7 @@ export function waitUntil(
       if (condition()) {
         resolve(true);
       } else if (Date.now() - startTime >= timeout) {
-        reject(new Error('Timeout exceeded'));
+        reject(new TimeoutError('Timeout exceeded'));
       } else {
         setTimeout(checkCondition, checkInterval);
       }

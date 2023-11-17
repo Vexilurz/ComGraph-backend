@@ -34,9 +34,4 @@ export class PortController {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
-
-  @Get('/errors')
-  getErrors() {
-    return this.portsService.getErrors()
-  }
 }

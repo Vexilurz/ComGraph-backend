@@ -4,6 +4,8 @@ import {ConfigModule} from "@nestjs/config";
 import {ServeStaticModule} from "@nestjs/serve-static";
 import { ProtocolModule } from './protocol/protocol.module';
 import { DataModule } from './data/data.module';
+import { StatusModule } from './status/status.module';
+import { ErrorsModule } from './errors/errors.module';
 import * as path from 'path';
 
 @Module({
@@ -18,7 +20,9 @@ import * as path from 'path';
     }),
     PortModule,
     ProtocolModule,
-    DataModule
+    DataModule,
+    StatusModule,
+    ErrorsModule
   ]
 })
 export class AppModule {
