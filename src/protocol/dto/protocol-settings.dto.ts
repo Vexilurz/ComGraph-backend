@@ -1,6 +1,10 @@
+import {NumberTypeName} from "../../data/types/NumberTypes";
+
 export class ProtocolSettingsDto {
   readonly command: number;
+  readonly responseValuesForEachChannel: number;
   readonly timeout: number;
   readonly cycleRequestFreq: number;
-  readonly expectedLength: number // TODO: remove this
+  readonly channels: Array<NumberTypeName>;
+  readonly newSession: boolean
 }

@@ -4,6 +4,9 @@ import {DataService} from "../data/data.service";
 import {PortService} from "../port/port.service";
 import {ErrorsService} from "../errors/errors.service";
 import {waitUntil} from "../shared/lib/waitUntil";
+import {NumberTypeName, NumberTypes} from "../data/types/NumberTypes";
+import {areArraysIdentical} from "../shared/lib/areArraysIdentical";
+import {ProtocolSettings} from "./protocol-settings";
 
 @Injectable()
 export class ProtocolService {
@@ -13,8 +16,7 @@ export class ProtocolService {
     private errorsService: ErrorsService
   ) {}
 
-  private settings: ProtocolSettingsDto
-  private expectedLength: number
+  private settings: ProtocolSettings = new ProtocolSettings()
   private cycle = {enable: false}
 
   private addError(message: string) {
@@ -24,23 +26,26 @@ export class ProtocolService {
   private getDataBufferLen = () => this.dataService.dataBuffer.length
 
   getStatus() {
+    const {settings} = this
     return {
+      settings,
       cycle: this.cycle.enable,
-      bufferLength: this.getDataBufferLen(),
-      settings: this.settings
+      session: this.dataService.getInfo()
     }
   }
 
   setSettings(dto: ProtocolSettingsDto) {
-    this.settings = dto
-    this.expectedLength = this.settings.expectedLength // TODO: calculate this!
-    return this.getStatus()
+    const {newSession} = this.settings.set(dto)
+    const {channelsTypes} = this.settings
+    if (newSession) this.dataService.initChannels(channelsTypes)
+    return {...this.settings, newSession}
   }
 
   async getOnce() {
     this.dataService.dataBuffer = []
     console.log(await this.oneRequest())
-    const data = this.dataService.dataBuffer.splice(0, this.expectedLength)
+    const {expectedLength} = this.settings
+    const data = this.dataService.dataBuffer.splice(0, expectedLength)
     return {
       data, // TODO: replace to parsed channels data
       isErrors: this.errorsService.isErrorsExists(),
@@ -49,24 +54,27 @@ export class ProtocolService {
   }
 
   private async sendRequest() {
-    await this.portService.sendData([this.settings.command])
+    const {command} = this.settings
+    await this.portService.sendData([command])
   }
 
   private async oneRequest() {
     const prevLength = this.getDataBufferLen();
     const getLen = () => this.getDataBufferLen() - prevLength
-    await this.sendRequest()
+    const {expectedLength, timeout} = this.settings
     try {
+      await this.sendRequest()
       await waitUntil(
-        () => getLen() >= this.expectedLength,
-        this.settings.timeout
+        () => getLen() >= expectedLength,
+        timeout
       )
     } catch (e) {
       if (e.name == 'TimeoutError')
-        this.addError(`Timeout. Expected length ${this.expectedLength}, but received only ${getLen()}.`)
+        throw new Error(`Timeout. Expected length ${expectedLength}, but received only ${getLen()}.`)
       else
-        throw e
+        throw new Error(`Init settings first! ${e.message}`)
     }
+    // TODO: parse there
     return {
       receivedLength: getLen(),
       prevLength,
@@ -91,7 +99,8 @@ export class ProtocolService {
       this.addError(e.message)
     }
     try {
-      setTimeout(async () => await this.cycleRequest(this.cycle), this.settings.cycleRequestFreq)
+      const {cycleRequestFreq} = this.settings
+      setTimeout(async () => await this.cycleRequest(this.cycle), cycleRequestFreq)
     } catch (e) {
       this.cycle.enable = false
       this.addError(e.message)
