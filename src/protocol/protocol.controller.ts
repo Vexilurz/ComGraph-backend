@@ -24,7 +24,7 @@ export class ProtocolController {
     }
   }
 
-  @Get('/cycle?')
+  @Post('/cycle?')
   async cycleRequest(@Query('enable') enable: string) {
     try {
       return await this.protocolService.setCycleRequest(enable === "true")

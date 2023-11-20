@@ -16,19 +16,19 @@ export class PortController {
   }
 
   @Post('/connect')
-  async connect(@Body() dto: PortSettingsDto) {
+  connect(@Body() dto: PortSettingsDto) {
     try {
-      await this.portsService.connect(dto)
-      return `Connected to ${dto.path}`
+      this.portsService.connect(dto)
+      return `Trying to connect to ${dto.path} every 1000ms...`
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 
   @Get('/disconnect')
-  async disconnect() {
+  disconnect() {
     try {
-      await this.portsService.disconnect()
+      this.portsService.disconnect()
       return 'Disconnected.'
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
