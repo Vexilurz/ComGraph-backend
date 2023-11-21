@@ -4,9 +4,7 @@ import {DataService} from "../data/data.service";
 import {PortService} from "../port/port.service";
 import {ErrorsService} from "../errors/errors.service";
 import {waitUntil} from "../shared/lib/waitUntil";
-import {NumberTypeName, NumberTypes} from "../data/types/NumberTypes";
-import {areArraysIdentical} from "../shared/lib/areArraysIdentical";
-import {ProtocolSettings} from "./protocol-settings";
+import {ProtocolSettings} from "./ProtocolSettings";
 
 @Injectable()
 export class ProtocolService {
@@ -44,10 +42,10 @@ export class ProtocolService {
   async getOnce() {
     this.dataService.dataBuffer = []
     console.log(await this.oneRequest())
-    const {expectedLength} = this.settings
-    const data = this.dataService.dataBuffer.splice(0, expectedLength)
+    const {responseValuesForEachChannel} = this.settings
+    const data = this.dataService.getLastChannelPoints(responseValuesForEachChannel)
     return {
-      data, // TODO: replace to parsed channels data
+      data,
       isErrors: this.errorsService.isErrorsExists(),
       status: this.getStatus()
     }
@@ -74,12 +72,14 @@ export class ProtocolService {
       else
         throw new Error(`Init settings first! ${e.message}`)
     }
-    // TODO: parse there
-    return {
+    const res = {
       receivedLength: getLen(),
       prevLength,
       currentLength: this.getDataBufferLen()
     }
+    const data = this.dataService.dataBuffer.splice(0, expectedLength)
+    await this.dataService.parseData(data)
+    return res
   }
 
   async setCycleRequest(enable: boolean) {

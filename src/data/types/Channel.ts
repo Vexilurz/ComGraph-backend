@@ -1,5 +1,5 @@
 import {NumberTypeName} from "./NumberTypes";
-import {Point} from "./Point";
+import {Point, PointFactory} from "./Point";
 
 export class Channel {
   private type: NumberTypeName
@@ -19,5 +19,13 @@ export class Channel {
       type: this.type,
       count: this.data.length
     }
+  }
+
+  addPoint(rawValue: Uint8Array) {
+    this.data.push(PointFactory.getNew(rawValue, this.type))
+  }
+
+  getLastPoints(count: number) {
+    return this.data.slice(-count)
   }
 }

@@ -4,34 +4,33 @@ import {areArraysIdentical} from "../shared/lib/areArraysIdentical";
 
 export interface IProtocolSettings {
   readonly command: number;
-  readonly responseValuesForEachChannel: number;
   readonly timeout: number;
   readonly cycleRequestFreq: number;
-  readonly expectedLength: number;
   readonly channelsTypes: Array<NumberTypeName>
+  readonly expectedLength: number;
 }
 
 export class ProtocolSettings implements IProtocolSettings {
   command = -1;
-  responseValuesForEachChannel = 0;
   timeout = 3000;
   cycleRequestFreq = 500;
   expectedLength = 0
   channelsTypes = []
+  responseValuesForEachChannel = 0;
 
   set(dto: ProtocolSettingsDto) {
-    const {command, timeout, cycleRequestFreq, channels, responseValuesForEachChannel} = dto
+    const {command, timeout, cycleRequestFreq, channelsTypes, responseValuesForEachChannel} = dto
     let {newSession} = dto
     let needToRecalcExpectedLength = false
 
     if (command && command > -1 && command < 256) this.command = command
-    else throw new Error(`Command set error: ${command}, was ${this.command}`)
+    else throw new Error(`Command set error: ${command}. keep ${this.command}`)
 
     if (timeout && timeout > 0) this.timeout = timeout
-    else throw new Error(`Timeout set error: ${timeout}, was ${this.timeout}`)
+    else throw new Error(`Timeout set error: ${timeout}. keep ${this.timeout}`)
 
     if (cycleRequestFreq && cycleRequestFreq > 0) this.cycleRequestFreq = cycleRequestFreq
-    else throw new Error(`cycleRequestFreq set error: ${cycleRequestFreq}, was ${this.cycleRequestFreq}`)
+    else throw new Error(`cycleRequestFreq set error: ${cycleRequestFreq}. keep ${this.cycleRequestFreq}`)
 
     if (responseValuesForEachChannel && responseValuesForEachChannel > 0) {
       if (this.responseValuesForEachChannel != responseValuesForEachChannel)
@@ -39,14 +38,17 @@ export class ProtocolSettings implements IProtocolSettings {
       this.responseValuesForEachChannel = responseValuesForEachChannel
     }
     else
-      throw new Error(`responseValuesForEachChannel set error: ${responseValuesForEachChannel}, was ${this.responseValuesForEachChannel}`)
+      throw new Error(`responseValuesForEachChannel set error: ${responseValuesForEachChannel}. keep ${this.responseValuesForEachChannel}`)
 
-    if (channels && channels.length > 0 && !areArraysIdentical(channels, this.channelsTypes)) {
-      const isChannelsCorrect = channels
+    if (
+      channelsTypes && channelsTypes.length > 0 &&
+      !areArraysIdentical(channelsTypes, this.channelsTypes)
+    ) {
+      const isChannelsCorrect = channelsTypes
         .map((channel) => Object.values(NumberTypeName).includes(channel))
         .reduce((acc, val) => acc && val, true)
       if (isChannelsCorrect) {
-        this.channelsTypes = channels
+        this.channelsTypes = channelsTypes
         needToRecalcExpectedLength = true
         newSession = true
       } else throw new Error(`Channels types are incorrect`)

@@ -4,7 +4,6 @@ export class Parser {
   private constructor() {}
 
   static getValueFromRaw(rawValue: Uint8Array, type: NumberTypeName): number {
-    console.log('getValueFromRaw: ', type, rawValue)
     switch (type) {
       case NumberTypeName.Int32:
         return -123123123;
