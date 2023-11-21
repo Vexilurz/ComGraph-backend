@@ -64,6 +64,7 @@ export class PortService {
     setTimeout(() => {this.tryToConnect(this.connection)}, 1000)
     if (!port?.isOpen) port?.open((e) => {
       if (e) this.addError(e.message)
+      else console.log('connected')
     })
   }
 

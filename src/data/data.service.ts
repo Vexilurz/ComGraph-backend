@@ -7,51 +7,43 @@ import {NumberTypeName, NumberTypes} from "./types/NumberTypes";
 export class DataService {
   constructor(private filesService: FilesService) {}
 
-  dataBuffer: Array<number> = []
-  channels: Array<Channel> = []
+  buffer: number[] = []
+  channels: Channel[] = []
 
+  // callback for com-port data
   onDataReceived = (data: Buffer) => {
-    this.dataBuffer.push(...data)
+    this.buffer.push(...data)
   }
 
-  initChannels(channelTypes: Array<NumberTypeName>) {
+  initChannels(channelTypes: NumberTypeName[]) {
     this.channels = channelTypes.map((name) => new Channel(name))
   }
 
-  getChannelsTypes() {
-    return this.channels.map((channel) => channel.getType())
+  getChannelsInfo() {
+    const type = this.channels.map((channel) => channel.type)
+    const count = this.channels.map((channel) => channel.data.length)
+    return {type, count}
   }
 
-  getInfo() {
-    const channelsInfo = this.channels.map((channel) => channel.getInfo())
-    return {
-      bufferLen: this.dataBuffer.length,
-      channels: channelsInfo
-    }
-  }
-
-  async parseData(data: number[]) {
+  async parseData() {
     for (let i = 0; i < this.channels.length; i++) {
       const channel = this.channels[i]
-      const {length} = NumberTypes[channel.getType()]
-      // if (length < data.length) throw new Error(`parsing data fail. [${data}], need len: ${length}`)
-      const raw = data.splice(0, length)
-      const rawValue = new Uint8Array(raw)
+      const {length} = NumberTypes[channel.type]
+      if (this.buffer.length < length)
+        throw new Error(`Parse error. [${this.buffer}], need length: ${length}`)
+      const rawValue = new Uint8Array(this.buffer.splice(0, length))
       channel.addPoint(rawValue)
-      // console.log(rawValue, data)
     }
-    if (data.length > 0) await this.parseData(data)
+    if (this.buffer.length > 0) await this.parseData()
   }
 
   getLastChannelPoints(count: number) {
-    let channels = []
+    const data = []
     for (let i = 0; i < this.channels.length; i++) {
       const channel = this.channels[i]
-      const type = channel.getType()
-      const data = channel.getLastPoints(count)
-      const totalPoints = channel.data.length
-      channels.push({type, data, totalPoints})
+      data.push(channel.getLastPoints(count))
     }
-    return channels
+    const info = this.getChannelsInfo()
+    return {info, data}
   }
 }

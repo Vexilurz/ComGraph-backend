@@ -1,28 +1,19 @@
 import {NumberTypeName} from "./NumberTypes";
-import {Point, PointFactory} from "./Point";
+import {Parser} from "./Parser";
 
 export class Channel {
-  private type: NumberTypeName
-  data: Array<Point>
+  readonly type: NumberTypeName
+  data: number[]
 
   constructor(type: NumberTypeName) {
+    if (!Object.values(NumberTypeName).includes(type))
+      throw new Error(`Wrong channel type: ${type}`)
     this.type = type
     this.data = []
   }
 
-  getType() {
-    return this.type
-  }
-
-  getInfo() {
-    return {
-      type: this.type,
-      count: this.data.length
-    }
-  }
-
   addPoint(rawValue: Uint8Array) {
-    this.data.push(PointFactory.getNew(rawValue, this.type))
+    this.data.push(Parser.getValueFromRaw(rawValue, this.type))
   }
 
   getLastPoints(count: number) {

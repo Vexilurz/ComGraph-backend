@@ -44,14 +44,9 @@ export class ProtocolSettings implements IProtocolSettings {
       channelsTypes && channelsTypes.length > 0 &&
       !areArraysIdentical(channelsTypes, this.channelsTypes)
     ) {
-      const isChannelsCorrect = channelsTypes
-        .map((channel) => Object.values(NumberTypeName).includes(channel))
-        .reduce((acc, val) => acc && val, true)
-      if (isChannelsCorrect) {
-        this.channelsTypes = channelsTypes
-        needToRecalcExpectedLength = true
-        newSession = true
-      } else throw new Error(`Channels types are incorrect`)
+      this.channelsTypes = channelsTypes
+      needToRecalcExpectedLength = true
+      newSession = true
     }
 
     if (needToRecalcExpectedLength) this.calcExpectedLength()

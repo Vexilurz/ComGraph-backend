@@ -21,14 +21,12 @@ export class ProtocolService {
     this.errorsService.addError('Protocol: '+message)
   }
 
-  private getDataBufferLen = () => this.dataService.dataBuffer.length
-
   getStatus() {
     const {settings} = this
     return {
       settings,
       cycle: this.cycle.enable,
-      session: this.dataService.getInfo()
+      channels: this.dataService.getChannelsInfo()
     }
   }
 
@@ -40,15 +38,9 @@ export class ProtocolService {
   }
 
   async getOnce() {
-    this.dataService.dataBuffer = []
     console.log(await this.oneRequest())
     const {responseValuesForEachChannel} = this.settings
-    const data = this.dataService.getLastChannelPoints(responseValuesForEachChannel)
-    return {
-      data,
-      isErrors: this.errorsService.isErrorsExists(),
-      status: this.getStatus()
-    }
+    return this.dataService.getLastChannelPoints(responseValuesForEachChannel)
   }
 
   private async sendRequest() {
@@ -57,9 +49,10 @@ export class ProtocolService {
   }
 
   private async oneRequest() {
-    const prevLength = this.getDataBufferLen();
-    const getLen = () => this.getDataBufferLen() - prevLength
+    this.dataService.buffer = []
+    const getLen = () => this.dataService.buffer.length
     const {expectedLength, timeout} = this.settings
+
     try {
       await this.sendRequest()
       await waitUntil(
@@ -69,17 +62,11 @@ export class ProtocolService {
     } catch (e) {
       if (e.name == 'TimeoutError')
         throw new Error(`Timeout. Expected length ${expectedLength}, but received only ${getLen()}.`)
-      else
-        throw new Error(`Init settings first! ${e.message}`)
+      else throw e
     }
-    const res = {
-      receivedLength: getLen(),
-      prevLength,
-      currentLength: this.getDataBufferLen()
-    }
-    const data = this.dataService.dataBuffer.splice(0, expectedLength)
-    await this.dataService.parseData(data)
-    return res
+    await this.dataService.parseData()
+
+    return this.dataService.getChannelsInfo()
   }
 
   async setCycleRequest(enable: boolean) {
