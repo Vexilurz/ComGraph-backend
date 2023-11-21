@@ -2,20 +2,12 @@ import {NumberTypeName, NumberTypes} from "../data/types/NumberTypes";
 import {ProtocolSettingsDto} from "./dto/protocol-settings.dto";
 import {areArraysIdentical} from "../shared/lib/areArraysIdentical";
 
-export interface IProtocolSettings {
-  readonly command: number;
-  readonly timeout: number;
-  readonly cycleRequestFreq: number;
-  readonly channelsTypes: Array<NumberTypeName>
-  readonly expectedLength: number;
-}
-
-export class ProtocolSettings implements IProtocolSettings {
+export class ProtocolSettings {
   command = -1;
   timeout = 3000;
   cycleRequestFreq = 500;
   expectedLength = 0
-  channelsTypes = []
+  channelsTypes: NumberTypeName[] = []
   responseValuesForEachChannel = 0;
 
   set(dto: ProtocolSettingsDto) {

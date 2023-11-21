@@ -26,7 +26,7 @@ export class ProtocolService {
     return {
       settings,
       cycle: this.cycle.enable,
-      channels: this.dataService.getChannelsInfo()
+      sessionLength: this.dataService.getSessionLength()
     }
   }
 
@@ -39,8 +39,7 @@ export class ProtocolService {
 
   async getOnce() {
     console.log(await this.oneRequest())
-    const {responseValuesForEachChannel} = this.settings
-    return this.dataService.getLastChannelPoints(responseValuesForEachChannel)
+    return this.dataService.getLastChannelPoints(this.settings.responseValuesForEachChannel)
   }
 
   private async sendRequest() {
@@ -64,9 +63,9 @@ export class ProtocolService {
         throw new Error(`Timeout. Expected length ${expectedLength}, but received only ${getLen()}.`)
       else throw e
     }
-    await this.dataService.parseData()
+    await this.dataService.parseData(this.settings.responseValuesForEachChannel)
 
-    return this.dataService.getChannelsInfo()
+    return {sessionLength: this.dataService.getSessionLength()}
   }
 
   async setCycleRequest(enable: boolean) {

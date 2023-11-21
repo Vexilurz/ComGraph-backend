@@ -19,31 +19,30 @@ export class DataService {
     this.channels = channelTypes.map((name) => new Channel(name))
   }
 
-  getChannelsInfo() {
-    const type = this.channels.map((channel) => channel.type)
-    const count = this.channels.map((channel) => channel.data.length)
-    return {type, count}
+  getSessionLength() {
+    return this.channels[0] ? this.channels[0].data.length : -1
   }
 
-  async parseData() {
-    for (let i = 0; i < this.channels.length; i++) {
-      const channel = this.channels[i]
-      const {length} = NumberTypes[channel.type]
-      if (this.buffer.length < length)
-        throw new Error(`Parse error. [${this.buffer}], need length: ${length}`)
-      const rawValue = new Uint8Array(this.buffer.splice(0, length))
-      channel.addPoint(rawValue)
+  async parseData(pointsCount: number) {
+    for (let j = 0; j < pointsCount; j++) {
+      for (let i = 0; i < this.channels.length; i++) {
+        const channel = this.channels[i]
+        const {length} = NumberTypes[channel.type]
+        if (this.buffer.length < length)
+          throw new Error(`Parse error. Remain buffer: [${this.buffer}]; need length: ${length}`)
+        const rawValue = new Uint8Array(this.buffer.splice(0, length))
+        channel.addPoint(rawValue)
+      }
     }
-    if (this.buffer.length > 0) await this.parseData()
+    if (this.buffer.length > 0) throw new Error(`Extra bytes in buffer: ${this.buffer.length}`)
   }
 
   getLastChannelPoints(count: number) {
-    const data = []
+    const res = []
     for (let i = 0; i < this.channels.length; i++) {
       const channel = this.channels[i]
-      data.push(channel.getLastPoints(count))
+      res.push(channel.getLastPoints(count))
     }
-    const info = this.getChannelsInfo()
-    return {info, data}
+    return res
   }
 }
