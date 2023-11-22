@@ -1,4 +1,4 @@
-import {NumberTypeName, NumberTypes} from "../data/types/NumberTypes";
+import {NumberTypeName, NumberTypes} from "../shared/types/NumberTypes";
 import {ProtocolSettingsDto} from "./dto/protocol-settings.dto";
 import {areArraysIdentical} from "../shared/lib/areArraysIdentical";
 

@@ -1,4 +1,4 @@
-import {NumberTypeName} from "../../data/types/NumberTypes";
+import {NumberTypeName} from "../../shared/types/NumberTypes";
 
 export class ProtocolSettingsDto {
   readonly command: number;

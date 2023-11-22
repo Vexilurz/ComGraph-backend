@@ -5,7 +5,9 @@ import {ServeStaticModule} from "@nestjs/serve-static";
 import { ProtocolModule } from './protocol/protocol.module';
 import { DataModule } from './data/data.module';
 import { StatusModule } from './status/status.module';
-import { ErrorsModule } from './errors/errors.module';
+import { LogModule } from './log/log.module';
+import { ChannelModule } from './channel/channel.module';
+import { ParserModule } from './parser/parser.module';
 import * as path from 'path';
 
 @Module({
@@ -22,7 +24,9 @@ import * as path from 'path';
     ProtocolModule,
     DataModule,
     StatusModule,
-    ErrorsModule
+    LogModule,
+    ChannelModule,
+    ParserModule
   ]
 })
 export class AppModule {

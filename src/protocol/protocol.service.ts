@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {ProtocolSettingsDto} from "./dto/protocol-settings.dto";
 import {DataService} from "../data/data.service";
 import {PortService} from "../port/port.service";
-import {ErrorsService} from "../errors/errors.service";
+import {LogService} from "../log/log.service";
 import {waitUntil} from "../shared/lib/waitUntil";
 import {ProtocolSettings} from "./ProtocolSettings";
 
@@ -11,15 +11,11 @@ export class ProtocolService {
   constructor(
     private dataService: DataService,
     private portService: PortService,
-    private errorsService: ErrorsService
+    private logService: LogService
   ) {}
 
   private settings: ProtocolSettings = new ProtocolSettings()
   private cycle = {enable: false}
-
-  private addError(message: string) {
-    this.errorsService.addError('Protocol: '+message)
-  }
 
   getStatus() {
     const {settings} = this
@@ -43,7 +39,7 @@ export class ProtocolService {
   }
 
   async getOnce() {
-    console.log(await this.oneRequest())
+    await this.oneRequest()
     return this.dataService.getLastChannelPoints(this.settings.responseValuesForEachChannel)
   }
 
@@ -64,18 +60,18 @@ export class ProtocolService {
       else throw e
     }
     await this.dataService.parseData(this.settings.responseValuesForEachChannel)
-
-    return {sessionLength: this.dataService.getSessionLength()}
+    this.logService.log(`sessionLength: ${this.dataService.getSessionLength()}`)
   }
 
   async setCycleRequest(enable: boolean) {
     if (enable) { // start
       if (this.cycle.enable) throw new Error('Cycle request already started.')
       this.cycle.enable = true
+      const errorsCount = this.logService.getErrorsCount()
       await this.cycleRequest(this.cycle)
-      if (this.errorsService.isErrorsExists()) {
+      if (this.logService.getErrorsCount() > errorsCount) {
         this.cycle.enable = false
-        throw new Error('There are some errors occurred. See log for details...')
+        throw new Error('There are some log occurred. See log for details...')
       }
     } else { // stop
       if (!this.cycle.enable) throw new Error('Cycle request not running.')
@@ -86,16 +82,16 @@ export class ProtocolService {
   private async cycleRequest({enable}) {
     if (!enable) return;
     try {
-      console.log(await this.oneRequest())
+      await this.oneRequest()
     } catch (e) {
-      this.addError(e.message)
+      this.logService.error(e.message)
     }
     try {
       const {cycleRequestFreq} = this.settings
       setTimeout(async () => await this.cycleRequest(this.cycle), cycleRequestFreq)
     } catch (e) {
       this.cycle.enable = false
-      this.addError(e.message)
+      this.logService.error(e.message)
     }
   }
 }

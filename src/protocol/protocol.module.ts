@@ -3,7 +3,7 @@ import { ProtocolService } from './protocol.service';
 import { ProtocolController } from './protocol.controller';
 import {DataModule} from "../data/data.module";
 import {PortModule} from "../port/port.module";
-import {ErrorsModule} from "../errors/errors.module";
+import {LogModule} from "../log/log.module";
 
 @Module({
   providers: [ProtocolService],
@@ -12,7 +12,7 @@ import {ErrorsModule} from "../errors/errors.module";
   imports: [
     DataModule,
     PortModule,
-    ErrorsModule
+    LogModule
   ]
 })
 export class ProtocolModule {}

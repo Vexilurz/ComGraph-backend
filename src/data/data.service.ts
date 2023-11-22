@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {FilesService} from "../files/files.service";
 import {Channel} from "./types/Channel";
-import {NumberTypeName, NumberTypes} from "./types/NumberTypes";
+import {NumberTypeName, NumberTypes} from "../shared/types/NumberTypes";
 
 @Injectable()
 export class DataService {

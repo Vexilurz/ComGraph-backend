@@ -1,4 +1,4 @@
-import {NumberTypeName} from "./NumberTypes";
+import {NumberTypeName} from "../../shared/types/NumberTypes";
 import {Parser} from "./Parser";
 
 export class Channel {

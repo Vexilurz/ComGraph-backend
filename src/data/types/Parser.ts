@@ -1,4 +1,4 @@
-import {NumberTypeName} from "./NumberTypes";
+import {NumberTypeName} from "../../shared/types/NumberTypes";
 
 export class Parser {
   private constructor() {}

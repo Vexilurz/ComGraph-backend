@@ -2,7 +2,7 @@ import {Injectable} from '@nestjs/common';
 import {PortSettingsDto} from "./dto/port-settings.dto";
 import {SerialPort} from 'serialport';
 import {DataService} from "../data/data.service";
-import {ErrorsService} from "../errors/errors.service";
+import {LogService} from "../log/log.service";
 
 interface IConnection {
   port: SerialPort,
@@ -13,17 +13,13 @@ interface IConnection {
 export class PortService {
   constructor(
     private dataService: DataService,
-    private errorsService: ErrorsService
+    private logService: LogService
   ) {}
 
   private settings: PortSettingsDto
   private connection: IConnection = {
     port: undefined,
     reconnect: false
-  }
-
-  private addError(message: string) {
-    this.errorsService.addError('SerialPort: '+message)
   }
 
   async getList() {
@@ -54,7 +50,7 @@ export class PortService {
     this.connection.port = new SerialPort({path, baudRate, autoOpen: false})
     const {port} = this.connection
     port.on('data', this.dataService.onDataReceived)
-    port.on('error', (e) => this.addError(e.message));
+    port.on('error', (e) => this.logService.error(e.message));
     this.connection.reconnect = true
     this.tryToConnect(this.connection)
   }
@@ -63,17 +59,18 @@ export class PortService {
     if (!reconnect) return;
     setTimeout(() => {this.tryToConnect(this.connection)}, 1000)
     if (!port?.isOpen) port?.open((e) => {
-      if (e) this.addError(e.message)
-      else console.log('connected')
+      if (e) this.logService.error(e.message)
+      else this.logService.log(`Connected to ${port.path} (${port.baudRate})`)
     })
   }
 
-  sendData(data: Array<number>): Promise<boolean> {
+  sendData(data: number[]): Promise<boolean> {
     const {port} = this.connection
     return new Promise((resolve, reject) => {
       if (!port?.isOpen) reject(new Error('Not connected to the port'))
       port?.write(data, (e) => {
         if (e) reject(e)
+        this.logService.log(`Data sent: ${data}`)
         resolve(true)
       })
     })
