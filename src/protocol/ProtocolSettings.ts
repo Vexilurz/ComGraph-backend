@@ -6,9 +6,9 @@ export class ProtocolSettings {
   command = -1;
   timeout = 3000;
   cycleRequestFreq = 500;
-  expectedLength = 0
   channelsTypes: NumberTypeName[] = []
   responseValuesForEachChannel = 0;
+  expectedLength = 0
 
   set(dto: ProtocolSettingsDto) {
     const {command, timeout, cycleRequestFreq, channelsTypes, responseValuesForEachChannel} = dto

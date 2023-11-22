@@ -37,14 +37,14 @@ export class ProtocolService {
     return {...this.settings, newSession}
   }
 
-  async getOnce() {
-    console.log(await this.oneRequest())
-    return this.dataService.getLastChannelPoints(this.settings.responseValuesForEachChannel)
-  }
-
   private async sendRequest() {
     const {command} = this.settings
     await this.portService.sendData([command])
+  }
+
+  async getOnce() {
+    console.log(await this.oneRequest())
+    return this.dataService.getLastChannelPoints(this.settings.responseValuesForEachChannel)
   }
 
   private async oneRequest() {
@@ -52,8 +52,8 @@ export class ProtocolService {
     const getLen = () => this.dataService.buffer.length
     const {expectedLength, timeout} = this.settings
 
+    await this.sendRequest()
     try {
-      await this.sendRequest()
       await waitUntil(
         () => getLen() >= expectedLength,
         timeout
@@ -68,13 +68,21 @@ export class ProtocolService {
     return {sessionLength: this.dataService.getSessionLength()}
   }
 
-  async setCycleRequest(enable: boolean) {
-    this.cycle.enable = enable
-    if (enable) await this.cycleRequest(this.cycle)
-    return {
-      isErrors: this.errorsService.isErrorsExists(),
-      status: this.getStatus()
+  async cycleRequestStart() {
+    if (this.cycle.enable)
+      throw new Error('Cycle request already started.')
+    this.cycle.enable = true
+    await this.cycleRequest(this.cycle)
+    if (this.errorsService.isErrorsExists()) {
+      this.cycle.enable = false
+      throw new Error('There are some errors occurred. See log for details...')
     }
+  }
+
+  cycleRequestStop() {
+    if (!this.cycle.enable)
+      throw new Error('Cycle request not running.')
+    this.cycle.enable = false
   }
 
   private async cycleRequest({enable}) {
