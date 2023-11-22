@@ -24,21 +24,12 @@ export class ProtocolController {
     }
   }
 
-  @Post('/cycle/start')
-  async cycleRequestStart() {
+  @Post('/cycle?')
+  async cycleRequest(@Query('enable') enable: string) {
+    const en = enable === 'true'
     try {
-      await this.protocolService.cycleRequestStart()
-      return 'Cycle request started.'
-    } catch (e) {
-      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
-
-  @Post('/cycle/stop')
-  cycleRequestStop() {
-    try {
-      this.protocolService.cycleRequestStop()
-      return 'Cycle request stopped.'
+      await this.protocolService.setCycleRequest(en)
+      return `Cycle request ${en ? 'started' : 'stopped'}.`
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }

@@ -68,21 +68,19 @@ export class ProtocolService {
     return {sessionLength: this.dataService.getSessionLength()}
   }
 
-  async cycleRequestStart() {
-    if (this.cycle.enable)
-      throw new Error('Cycle request already started.')
-    this.cycle.enable = true
-    await this.cycleRequest(this.cycle)
-    if (this.errorsService.isErrorsExists()) {
+  async setCycleRequest(enable: boolean) {
+    if (enable) { // start
+      if (this.cycle.enable) throw new Error('Cycle request already started.')
+      this.cycle.enable = true
+      await this.cycleRequest(this.cycle)
+      if (this.errorsService.isErrorsExists()) {
+        this.cycle.enable = false
+        throw new Error('There are some errors occurred. See log for details...')
+      }
+    } else { // stop
+      if (!this.cycle.enable) throw new Error('Cycle request not running.')
       this.cycle.enable = false
-      throw new Error('There are some errors occurred. See log for details...')
     }
-  }
-
-  cycleRequestStop() {
-    if (!this.cycle.enable)
-      throw new Error('Cycle request not running.')
-    this.cycle.enable = false
   }
 
   private async cycleRequest({enable}) {

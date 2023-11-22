@@ -29,7 +29,7 @@ export class DataService {
         const channel = this.channels[i]
         const {length} = NumberTypes[channel.type]
         if (this.buffer.length < length)
-          throw new Error(`Parse error. Remain buffer: [${this.buffer}]; need length: ${length}`)
+          throw new Error(`Parse error. Buffer: [${this.buffer}]; need ${length} bytes. (p${j},ch${i})`)
         const rawValue = new Uint8Array(this.buffer.splice(0, length))
         channel.addPoint(rawValue)
       }
