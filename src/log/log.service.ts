@@ -34,17 +34,11 @@ export class LogService {
   getErrorsCount = () => this.errors.length
 
   log(message: string) {
-    this.addMessage({
-      message,
-      array: this.messages
-    })
+    this.addMessage({message, array: this.messages})
   }
 
   error(message: string) {
-    this.addMessage({
-      message,
-      array: this.errors
-    })
+    this.addMessage({message, array: this.errors})
   }
 
   private addMessage(dto: MessageDTO) {

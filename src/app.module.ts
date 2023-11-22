@@ -3,11 +3,11 @@ import { PortModule } from './port/port.module';
 import {ConfigModule} from "@nestjs/config";
 import {ServeStaticModule} from "@nestjs/serve-static";
 import { ProtocolModule } from './protocol/protocol.module';
-import { DataModule } from './data/data.module';
 import { StatusModule } from './status/status.module';
 import { LogModule } from './log/log.module';
 import { ChannelModule } from './channel/channel.module';
 import { ParserModule } from './parser/parser.module';
+import { NumbersModule } from './numbers/numbers.module';
 import * as path from 'path';
 
 @Module({
@@ -22,11 +22,11 @@ import * as path from 'path';
     }),
     PortModule,
     ProtocolModule,
-    DataModule,
     StatusModule,
     LogModule,
     ChannelModule,
-    ParserModule
+    ParserModule,
+    NumbersModule
   ]
 })
 export class AppModule {

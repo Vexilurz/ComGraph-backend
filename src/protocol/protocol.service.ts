@@ -1,52 +1,52 @@
 import { Injectable } from '@nestjs/common';
 import {ProtocolSettingsDto} from "./dto/protocol-settings.dto";
-import {DataService} from "../data/data.service";
 import {PortService} from "../port/port.service";
 import {LogService} from "../log/log.service";
 import {waitUntil} from "../shared/lib/waitUntil";
-import {ProtocolSettings} from "./ProtocolSettings";
+import {SettingsService} from "./settings/settings.service";
+import {ChannelService} from "../channel/channel.service";
 
 @Injectable()
 export class ProtocolService {
   constructor(
-    private dataService: DataService,
+    private settingsService: SettingsService,
     private portService: PortService,
+    private channelService: ChannelService,
     private logService: LogService
   ) {}
 
-  private settings: ProtocolSettings = new ProtocolSettings()
   private cycle = {enable: false}
 
   getStatus() {
-    const {settings} = this
     return {
-      settings,
+      settings: this.settingsService.current,
       cycle: this.cycle.enable,
-      sessionLength: this.dataService.getSessionLength()
+      sessionLength: this.channelService.getSessionLength()
     }
   }
 
   setSettings(dto: ProtocolSettingsDto) {
-    const {newSession} = this.settings.set(dto)
-    const {channelsTypes} = this.settings
-    if (newSession) this.dataService.initChannels(channelsTypes)
-    return {...this.settings, newSession}
+    const {newSession} = this.settingsService.set(dto)
+    const {channelsTypes} = this.settingsService.current
+    if (newSession) this.channelService.init(channelsTypes)
+    return {...this.settingsService.current, newSession}
   }
 
   private async sendRequest() {
-    const {command} = this.settings
+    const {command} = this.settingsService.current
     await this.portService.sendData([command])
   }
 
   async getOnce() {
     await this.oneRequest()
-    return this.dataService.getLastChannelPoints(this.settings.responseValuesForEachChannel)
+    const {responseValuesForEachChannel} = this.settingsService.current
+    return this.channelService.getLastChannelPoints(responseValuesForEachChannel)
   }
 
   private async oneRequest() {
-    this.dataService.buffer = []
-    const getLen = () => this.dataService.buffer.length
-    const {expectedLength, timeout} = this.settings
+    this.portService.buffer = []
+    const getLen = () => this.portService.buffer.length
+    const {expectedLength, timeout, responseValuesForEachChannel} = this.settingsService.current
 
     await this.sendRequest()
     try {
@@ -59,8 +59,8 @@ export class ProtocolService {
         throw new Error(`Timeout. Expected length ${expectedLength}, but received only ${getLen()}.`)
       else throw e
     }
-    await this.dataService.parseData(this.settings.responseValuesForEachChannel)
-    this.logService.log(`sessionLength: ${this.dataService.getSessionLength()}`)
+    await this.channelService.parseData(this.portService.buffer, responseValuesForEachChannel)
+    this.logService.log(`sessionLength: ${this.channelService.getSessionLength()}`)
   }
 
   async setCycleRequest(enable: boolean) {
@@ -87,7 +87,7 @@ export class ProtocolService {
       this.logService.error(e.message)
     }
     try {
-      const {cycleRequestFreq} = this.settings
+      const {cycleRequestFreq} = this.settingsService.current
       setTimeout(async () => await this.cycleRequest(this.cycle), cycleRequestFreq)
     } catch (e) {
       this.cycle.enable = false

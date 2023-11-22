@@ -1,10 +1,12 @@
-import {NumberTypeName} from "../../shared/types/NumberTypes";
+import { Injectable } from '@nestjs/common';
+import {NumbersService, NumberType, NumberTypeName} from "../numbers/numbers.service";
 
-export class Parser {
-  private constructor() {}
+@Injectable()
+export class ParserService {
+  constructor(private numbersService: NumbersService) {}
 
-  static getValueFromRaw(rawValue: Uint8Array, type: NumberTypeName): number {
-    switch (type) {
+  getValueFromRaw(rawValue: Uint8Array, type: NumberType): number {
+    switch (type.name) {
       case NumberTypeName.Int32:
         return -123123123;
       case NumberTypeName.Int24:

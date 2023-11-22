@@ -1,7 +1,6 @@
 import {Injectable} from '@nestjs/common';
 import {PortSettingsDto} from "./dto/port-settings.dto";
 import {SerialPort} from 'serialport';
-import {DataService} from "../data/data.service";
 import {LogService} from "../log/log.service";
 
 interface IConnection {
@@ -12,7 +11,6 @@ interface IConnection {
 @Injectable()
 export class PortService {
   constructor(
-    private dataService: DataService,
     private logService: LogService
   ) {}
 
@@ -21,6 +19,8 @@ export class PortService {
     port: undefined,
     reconnect: false
   }
+
+  buffer: number[] = []
 
   async getList() {
     return await SerialPort.list()
@@ -49,10 +49,14 @@ export class PortService {
     this.disconnect()
     this.connection.port = new SerialPort({path, baudRate, autoOpen: false})
     const {port} = this.connection
-    port.on('data', this.dataService.onDataReceived)
+    port.on('data', this.onDataReceived)
     port.on('error', (e) => this.logService.error(e.message));
     this.connection.reconnect = true
     this.tryToConnect(this.connection)
+  }
+
+  private onDataReceived = (data: Buffer) => { // callback
+    this.buffer.push(...data)
   }
 
   private tryToConnect({port, reconnect}: IConnection) {
