@@ -16,15 +16,15 @@ export class ChannelService {
 
   channels: IChannel[] = []
 
-  private getNew(typeName: string): IChannel {
+  init(channelTypes: string[]) {
+    this.channels = channelTypes.map((typeName) => this._getNew(typeName))
+  }
+
+  private _getNew(typeName: string): IChannel {
     return {
       type: this.numbersService.getFromString(typeName),
       data: []
     }
-  }
-
-  init(channelTypes: string[]) {
-    this.channels = channelTypes.map((typeName) => this.getNew(typeName))
   }
 
   getSessionLength() {

@@ -14,8 +14,8 @@ export class PortService {
     private logService: LogService
   ) {}
 
-  private settings: PortSettingsDto
-  private connection: IConnection = {
+  private _settings: PortSettingsDto
+  private _connection: IConnection = {
     port: undefined,
     reconnect: false
   }
@@ -27,7 +27,7 @@ export class PortService {
   }
 
   getStatus() {
-    const {port, reconnect} = this.connection
+    const {port, reconnect} = this._connection
     return {
       path: port?.path,
       baudRate: port?.baudRate,
@@ -37,31 +37,31 @@ export class PortService {
   }
 
   disconnect() {
-    this.connection.reconnect = false
-    const {port} = this.connection
+    this._connection.reconnect = false
+    const {port} = this._connection
     port?.close()
     port?.destroy()
   }
 
   connect(settings: PortSettingsDto) {
-    this.settings = settings
-    const {path, baudRate} = this.settings
+    this._settings = settings
+    const {path, baudRate} = this._settings
     this.disconnect()
-    this.connection.port = new SerialPort({path, baudRate, autoOpen: false})
-    const {port} = this.connection
-    port.on('data', this.onDataReceived)
+    this._connection.port = new SerialPort({path, baudRate, autoOpen: false})
+    const {port} = this._connection
+    port.on('data', this._onDataReceived)
     port.on('error', (e) => this.logService.error(e.message));
-    this.connection.reconnect = true
-    this.tryToConnect(this.connection)
+    this._connection.reconnect = true
+    this._tryToConnect(this._connection)
   }
 
-  private onDataReceived = (data: Buffer) => { // callback
+  private _onDataReceived = (data: Buffer) => { // callback
     this.buffer.push(...data)
   }
 
-  private tryToConnect({port, reconnect}: IConnection) {
+  private _tryToConnect({port, reconnect}: IConnection) {
     if (!reconnect) return;
-    setTimeout(() => {this.tryToConnect(this.connection)}, 1000)
+    setTimeout(() => {this._tryToConnect(this._connection)}, 1000)
     if (!port?.isOpen) port?.open((e) => {
       if (e) this.logService.error(e.message)
       else this.logService.log(`Connected to ${port.path} (${port.baudRate})`)
@@ -69,7 +69,7 @@ export class PortService {
   }
 
   sendData(data: number[]): Promise<boolean> {
-    const {port} = this.connection
+    const {port} = this._connection
     return new Promise((resolve, reject) => {
       if (!port?.isOpen) reject(new Error('Not connected to the port'))
       port?.write(data, (e) => {

@@ -15,12 +15,12 @@ export class ProtocolService {
     private logService: LogService
   ) {}
 
-  private cycle = {enable: false}
+  private _cycle = {enable: false}
 
   getStatus() {
     return {
       settings: this.settingsService.current,
-      cycle: this.cycle.enable,
+      cycle: this._cycle.enable,
       sessionLength: this.channelService.getSessionLength()
     }
   }
@@ -32,23 +32,23 @@ export class ProtocolService {
     return {...this.settingsService.current, newSession}
   }
 
-  private async sendRequest() {
+  private async _sendRequest() {
     const {command} = this.settingsService.current
     await this.portService.sendData([command])
   }
 
   async getOnce() {
-    await this.oneRequest()
+    await this._oneRequest()
     const {responseValuesForEachChannel} = this.settingsService.current
     return this.channelService.getLastChannelPoints(responseValuesForEachChannel)
   }
 
-  private async oneRequest() {
+  private async _oneRequest() {
     this.portService.buffer = []
     const getLen = () => this.portService.buffer.length
     const {expectedLength, timeout, responseValuesForEachChannel} = this.settingsService.current
 
-    await this.sendRequest()
+    await this._sendRequest()
     try {
       await waitUntil(
         () => getLen() >= expectedLength,
@@ -65,32 +65,32 @@ export class ProtocolService {
 
   async setCycleRequest(enable: boolean) {
     if (enable) { // start
-      if (this.cycle.enable) throw new Error('Cycle request already started.')
-      this.cycle.enable = true
+      if (this._cycle.enable) throw new Error('Cycle request already started.')
+      this._cycle.enable = true
       const errorsCount = this.logService.getErrorsCount()
-      await this.cycleRequest(this.cycle)
+      await this._cycleRequest(this._cycle)
       if (this.logService.getErrorsCount() > errorsCount) {
-        this.cycle.enable = false
+        this._cycle.enable = false
         throw new Error('There are some log occurred. See log for details...')
       }
     } else { // stop
-      if (!this.cycle.enable) throw new Error('Cycle request not running.')
-      this.cycle.enable = false
+      if (!this._cycle.enable) throw new Error('Cycle request not running.')
+      this._cycle.enable = false
     }
   }
 
-  private async cycleRequest({enable}) {
+  private async _cycleRequest({enable}) {
     if (!enable) return;
     try {
-      await this.oneRequest()
+      await this._oneRequest()
     } catch (e) {
       this.logService.error(e.message)
     }
     try {
       const {cycleRequestFreq} = this.settingsService.current
-      setTimeout(async () => await this.cycleRequest(this.cycle), cycleRequestFreq)
+      setTimeout(async () => await this._cycleRequest(this._cycle), cycleRequestFreq)
     } catch (e) {
-      this.cycle.enable = false
+      this._cycle.enable = false
       this.logService.error(e.message)
     }
   }

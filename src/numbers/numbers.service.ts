@@ -22,24 +22,28 @@ export class NumbersService {
   readonly numberTypes: NumberType[] = []
 
   constructor() {
-    this.addType(NumberTypeName.Int32, 4)
-    this.addType(NumberTypeName.Int24, 3)
-    this.addType(NumberTypeName.Int16, 2)
-    this.addType(NumberTypeName.Int8, 1)
-    this.addType(NumberTypeName.UInt32, 4)
-    this.addType(NumberTypeName.UInt24, 3)
-    this.addType(NumberTypeName.UInt16, 2)
-    this.addType(NumberTypeName.UInt8, 1)
-    this.addType(NumberTypeName.Float32, 4)
+    this._addType(NumberTypeName.Int32, 4)
+    this._addType(NumberTypeName.Int24, 3)
+    this._addType(NumberTypeName.Int16, 2)
+    this._addType(NumberTypeName.Int8, 1)
+    this._addType(NumberTypeName.UInt32, 4)
+    this._addType(NumberTypeName.UInt24, 3)
+    this._addType(NumberTypeName.UInt16, 2)
+    this._addType(NumberTypeName.UInt8, 1)
+    this._addType(NumberTypeName.Float32, 4)
   }
 
-  private addType(name: NumberTypeName, length: number) {
+  private _addType(name: NumberTypeName, length: number) {
     this.numberTypes.push({name, length})
+  }
+
+  getSupported() {
+    return this.numberTypes
   }
 
   getFromString(name: string): NumberType {
     const res = this.numberTypes.find(value => value.name == name)
-    if (!res) throw new Error(`Can't find number type ${name}`)
+    if (!res) throw new Error(`Can't find number type '${name}'`)
     return res
   }
 

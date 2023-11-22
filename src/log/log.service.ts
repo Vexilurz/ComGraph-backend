@@ -18,38 +18,38 @@ export interface LogReport {
 
 @Injectable()
 export class LogService {
-  private MAX_LENGTH = 50
-  private id = 0
-  private messages: Message[] = []
-  private errors: Message[] = []
+  private _MAX_LENGTH = 50
+  private _id = 0
+  private _messages: Message[] = []
+  private _errors: Message[] = []
 
   getLog(): LogReport {
-    const log = this.messages
-    const errors = this.errors
-    this.messages = []
-    this.errors = []
+    const log = this._messages
+    const errors = this._errors
+    this._messages = []
+    this._errors = []
     return {log, errors}
   }
 
-  getErrorsCount = () => this.errors.length
+  getErrorsCount = () => this._errors.length
 
   log(message: string) {
-    this.addMessage({message, array: this.messages})
+    this._addMessage({message, array: this._messages})
   }
 
   error(message: string) {
-    this.addMessage({message, array: this.errors})
+    this._addMessage({message, array: this._errors})
   }
 
-  private addMessage(dto: MessageDTO) {
+  private _addMessage(dto: MessageDTO) {
     console.log(dto.message)
-    dto.array.push(this.getMsgWithNowDate(dto.message))
-    if (dto.array.length > this.MAX_LENGTH)
-      dto.array.splice(0, dto.array.length - this.MAX_LENGTH)
+    dto.array.push(this._getMsgWithNowDate(dto.message))
+    if (dto.array.length > this._MAX_LENGTH)
+      dto.array.splice(0, dto.array.length - this._MAX_LENGTH)
   }
 
-  private getMsgWithNowDate(message: string): Message {
+  private _getMsgWithNowDate(message: string): Message {
     const date = (new Date(Date.now())).toISOString()
-    return {id: this.id++, message, date}
+    return {id: this._id++, message, date}
   }
 }
