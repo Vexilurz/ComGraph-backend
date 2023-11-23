@@ -67,11 +67,11 @@ export class ProtocolService {
     if (enable) { // start
       if (this._cycle.enable) throw new Error('Cycle request already started.')
       this._cycle.enable = true
-      const errorsCount = this.logService.getErrorsCount()
+      const prevErrorsCount = this.logService.getErrorsCount()
       await this._cycleRequest(this._cycle)
-      if (this.logService.getErrorsCount() > errorsCount) {
+      if (this.logService.getErrorsCount() > prevErrorsCount) {
         this._cycle.enable = false
-        throw new Error('There are some log occurred. See log for details...')
+        throw new Error('There are some errors occurred. See log for details...')
       }
     } else { // stop
       if (!this._cycle.enable) throw new Error('Cycle request not running.')

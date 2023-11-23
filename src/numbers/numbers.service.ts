@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-export enum NumberTypeName {
+export enum NumberKind {
   Int32 = 'Int32',
   Int24 = 'Int24',
   Int16 = 'Int16',
@@ -13,7 +13,7 @@ export enum NumberTypeName {
 }
 
 export interface NumberType {
-  name: NumberTypeName;
+  kind: NumberKind;
   length: number
 }
 
@@ -22,32 +22,32 @@ export class NumbersService {
   readonly numberTypes: NumberType[] = []
 
   constructor() {
-    this._addType(NumberTypeName.Int32, 4)
-    this._addType(NumberTypeName.Int24, 3)
-    this._addType(NumberTypeName.Int16, 2)
-    this._addType(NumberTypeName.Int8, 1)
-    this._addType(NumberTypeName.UInt32, 4)
-    this._addType(NumberTypeName.UInt24, 3)
-    this._addType(NumberTypeName.UInt16, 2)
-    this._addType(NumberTypeName.UInt8, 1)
-    this._addType(NumberTypeName.Float32, 4)
+    this._addType(NumberKind.Int32, 4)
+    this._addType(NumberKind.Int24, 3)
+    this._addType(NumberKind.Int16, 2)
+    this._addType(NumberKind.Int8, 1)
+    this._addType(NumberKind.UInt32, 4)
+    this._addType(NumberKind.UInt24, 3)
+    this._addType(NumberKind.UInt16, 2)
+    this._addType(NumberKind.UInt8, 1)
+    this._addType(NumberKind.Float32, 4)
   }
 
-  private _addType(name: NumberTypeName, length: number) {
-    this.numberTypes.push({name, length})
+  private _addType(name: NumberKind, length: number) {
+    this.numberTypes.push({kind: name, length})
   }
 
   getSupported() {
     return this.numberTypes
   }
 
-  getFromString(name: string): NumberType {
-    const res = this.numberTypes.find(value => value.name == name)
-    if (!res) throw new Error(`Can't find number type '${name}'`)
+  getFromString(kind: string): NumberType {
+    const res = this.numberTypes.find(value => value.kind == kind)
+    if (!res) throw new Error(`Can't find number type '${kind}'`)
     return res
   }
 
-  getLength(name: string): number {
-    return this.getFromString(name).length
+  getLength(kind: string): number {
+    return this.getFromString(kind).length
   }
 }

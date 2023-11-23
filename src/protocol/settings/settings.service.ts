@@ -17,11 +17,11 @@ export class SettingsService {
   constructor(private numbersService: NumbersService) {}
 
   readonly current: ISettings = {
-    command: -1,
+    command: 0,
     timeout: 3000,
     cycleRequestFreq: 500,
     channelsTypes: [],
-    responseValuesForEachChannel: 0,
+    responseValuesForEachChannel: 1,
     expectedLength: 0
   }
 
