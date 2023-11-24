@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {NumbersService, NumberType, NumberKind} from "../numbers/numbers.service";
+import {NumbersService, NumberKind} from "../numbers/numbers.service";
 
 @Injectable()
 export class ParserService {
@@ -7,10 +7,10 @@ export class ParserService {
 
   littleEndian = false
 
-  getValueFromRaw(rawValue: Uint8Array, type: NumberType): number {
+  getValueFromRaw(rawValue: Uint8Array, kind: NumberKind): number {
     const dataView = new DataView(rawValue.buffer)
     const {littleEndian} = this
-    switch (type.kind) {
+    switch (kind) {
       case NumberKind.Int32:
         return dataView.getInt32(0, littleEndian);
       case NumberKind.Int24:
@@ -41,7 +41,7 @@ export class ParserService {
     const extendedArray = new Uint8Array(4);
     const offset = littleEndian ? 0 : 1
     extendedArray.set(arr, offset)
-    if (sign) {
+    if (sign) { // sxt
       const index = littleEndian ? 3 : 0
       const indexToCheck = littleEndian ? 2 : 1
       extendedArray[index] = (extendedArray[indexToCheck] & 0x80) > 0 ? 0xFF : 0x00

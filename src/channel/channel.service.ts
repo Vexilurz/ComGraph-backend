@@ -27,7 +27,7 @@ export class ChannelService {
     }
   }
 
-  getSessionLength() {
+  getSessionLength() { // TODO: it's crunch now...
     return this.channels[0] ? this.channels[0].data.length : -1
   }
 
@@ -39,7 +39,7 @@ export class ChannelService {
         if (data.length < length)
           throw new Error(`Parse error. Buffer: [${data}]; need ${length} bytes. (p${j},ch${i})`)
         const rawValue = new Uint8Array(data.splice(0, length))
-        channel.data.push(this.parserService.getValueFromRaw(rawValue, channel.type))
+        channel.data.push(this.parserService.getValueFromRaw(rawValue, channel.type.kind))
       }
     }
     if (data.length > 0) throw new Error(`Extra bytes in buffer: ${data.length}`)
