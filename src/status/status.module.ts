@@ -3,7 +3,7 @@ import { StatusController } from './status.controller';
 import { StatusService } from './status.service';
 import {PortModule} from "../port/port.module";
 import {ProtocolModule} from "../protocol/protocol.module";
-import {ErrorsModule} from "../errors/errors.module";
+import {LogModule} from "../log/log.module";
 
 @Module({
   controllers: [StatusController],
@@ -11,7 +11,7 @@ import {ErrorsModule} from "../errors/errors.module";
   imports: [
     PortModule,
     ProtocolModule,
-    ErrorsModule
+    LogModule
   ]
 })
 export class StatusModule {}

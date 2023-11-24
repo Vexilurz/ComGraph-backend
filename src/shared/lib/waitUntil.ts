@@ -1,4 +1,4 @@
-import {TimeoutError} from "../types/TimeoutError";
+import {TimeoutError} from "../types/errors/TimeoutError";
 
 export function waitUntil(
   condition: () => boolean,

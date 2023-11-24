@@ -1,100 +1,98 @@
 import { Injectable } from '@nestjs/common';
 import {ProtocolSettingsDto} from "./dto/protocol-settings.dto";
-import {DataService} from "../data/data.service";
 import {PortService} from "../port/port.service";
-import {ErrorsService} from "../errors/errors.service";
+import {LogService} from "../log/log.service";
 import {waitUntil} from "../shared/lib/waitUntil";
+import {SettingsService} from "./settings/settings.service";
+import {ChannelService} from "../channel/channel.service";
 
 @Injectable()
 export class ProtocolService {
   constructor(
-    private dataService: DataService,
+    private settingsService: SettingsService,
     private portService: PortService,
-    private errorsService: ErrorsService
+    private channelService: ChannelService,
+    private logService: LogService
   ) {}
 
-  private settings: ProtocolSettingsDto
-  private expectedLength: number
-  private cycle = {enable: false}
-
-  private addError(message: string) {
-    this.errorsService.addError('Protocol: '+message)
-  }
-
-  private getDataBufferLen = () => this.dataService.dataBuffer.length
+  private _cycle = {enable: false}
 
   getStatus() {
     return {
-      cycle: this.cycle.enable,
-      bufferLength: this.getDataBufferLen(),
-      settings: this.settings
+      settings: this.settingsService.current,
+      cycle: this._cycle.enable,
+      sessionLength: this.channelService.getSessionLength()
     }
   }
 
   setSettings(dto: ProtocolSettingsDto) {
-    this.settings = dto
-    this.expectedLength = this.settings.expectedLength // TODO: calculate this!
-    return this.getStatus()
+    const {newSession} = this.settingsService.set(dto)
+    const {channelsTypes, littleEndian} = this.settingsService.current
+    this.channelService.setLittleEndian(littleEndian)
+    if (newSession) this.channelService.init(channelsTypes)
+    return {...this.settingsService.current, newSession}
+  }
+
+  private async _sendRequest() {
+    const {command} = this.settingsService.current
+    await this.portService.sendData([command])
   }
 
   async getOnce() {
-    this.dataService.dataBuffer = []
-    console.log(await this.oneRequest())
-    const data = this.dataService.dataBuffer.splice(0, this.expectedLength)
-    return {
-      data, // TODO: replace to parsed channels data
-      isErrors: this.errorsService.isErrorsExists(),
-      status: this.getStatus()
-    }
+    await this._oneRequest()
+    const {responseValuesForEachChannel} = this.settingsService.current
+    return this.channelService.getLastChannelPoints(responseValuesForEachChannel)
   }
 
-  private async sendRequest() {
-    await this.portService.sendData([this.settings.command])
-  }
+  private async _oneRequest() {
+    this.portService.buffer = []
+    const getLen = () => this.portService.buffer.length
+    const {expectedLength, timeout, responseValuesForEachChannel} = this.settingsService.current
 
-  private async oneRequest() {
-    const prevLength = this.getDataBufferLen();
-    const getLen = () => this.getDataBufferLen() - prevLength
-    await this.sendRequest()
+    await this._sendRequest()
     try {
       await waitUntil(
-        () => getLen() >= this.expectedLength,
-        this.settings.timeout
+        () => getLen() >= expectedLength,
+        timeout
       )
     } catch (e) {
       if (e.name == 'TimeoutError')
-        this.addError(`Timeout. Expected length ${this.expectedLength}, but received only ${getLen()}.`)
-      else
-        throw e
+        throw new Error(`Timeout. Expected length ${expectedLength}, but received only ${getLen()}.`)
+      else throw e
     }
-    return {
-      receivedLength: getLen(),
-      prevLength,
-      currentLength: this.getDataBufferLen()
-    }
+    await this.channelService.parseData(this.portService.buffer, responseValuesForEachChannel)
+    this.logService.log(`sessionLength: ${this.channelService.getSessionLength()}`)
   }
 
   async setCycleRequest(enable: boolean) {
-    this.cycle.enable = enable
-    if (enable) await this.cycleRequest(this.cycle)
-    return {
-      isErrors: this.errorsService.isErrorsExists(),
-      status: this.getStatus()
+    if (enable) { // start
+      if (this._cycle.enable) throw new Error('Cycle request already started.')
+      this._cycle.enable = true
+      const prevErrorsCount = this.logService.getErrorsCount()
+      await this._cycleRequest(this._cycle)
+      if (this.logService.getErrorsCount() > prevErrorsCount) {
+        this._cycle.enable = false
+        throw new Error('There are some errors occurred. See log for details...')
+      }
+    } else { // stop
+      if (!this._cycle.enable) throw new Error('Cycle request not running.')
+      this._cycle.enable = false
     }
   }
 
-  private async cycleRequest({enable}) {
+  private async _cycleRequest({enable}) {
     if (!enable) return;
     try {
-      console.log(await this.oneRequest())
+      await this._oneRequest()
     } catch (e) {
-      this.addError(e.message)
+      this.logService.error(e.message)
     }
     try {
-      setTimeout(async () => await this.cycleRequest(this.cycle), this.settings.cycleRequestFreq)
+      const {cycleRequestFreq} = this.settingsService.current
+      setTimeout(async () => await this._cycleRequest(this._cycle), cycleRequestFreq)
     } catch (e) {
-      this.cycle.enable = false
-      this.addError(e.message)
+      this._cycle.enable = false
+      this.logService.error(e.message)
     }
   }
 }

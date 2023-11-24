@@ -1,8 +1,7 @@
 import {Injectable} from '@nestjs/common';
 import {PortSettingsDto} from "./dto/port-settings.dto";
 import {SerialPort} from 'serialport';
-import {DataService} from "../data/data.service";
-import {ErrorsService} from "../errors/errors.service";
+import {LogService} from "../log/log.service";
 
 interface IConnection {
   port: SerialPort,
@@ -12,26 +11,23 @@ interface IConnection {
 @Injectable()
 export class PortService {
   constructor(
-    private dataService: DataService,
-    private errorsService: ErrorsService
+    private logService: LogService
   ) {}
 
-  private settings: PortSettingsDto
-  private connection: IConnection = {
+  private _settings: PortSettingsDto
+  private _connection: IConnection = {
     port: undefined,
     reconnect: false
   }
 
-  private addError(message: string) {
-    this.errorsService.addError('SerialPort: '+message)
-  }
+  buffer: number[] = []
 
   async getList() {
     return await SerialPort.list()
   }
 
   getStatus() {
-    const {port, reconnect} = this.connection
+    const {port, reconnect} = this._connection
     return {
       path: port?.path,
       baudRate: port?.baudRate,
@@ -41,38 +37,44 @@ export class PortService {
   }
 
   disconnect() {
-    this.connection.reconnect = false
-    const {port} = this.connection
+    this._connection.reconnect = false
+    const {port} = this._connection
     port?.close()
     port?.destroy()
   }
 
   connect(settings: PortSettingsDto) {
-    this.settings = settings
-    const {path, baudRate} = this.settings
+    this._settings = settings
+    const {path, baudRate} = this._settings
     this.disconnect()
-    this.connection.port = new SerialPort({path, baudRate, autoOpen: false})
-    const {port} = this.connection
-    port.on('data', this.dataService.onDataReceived)
-    port.on('error', (e) => this.addError(e.message));
-    this.connection.reconnect = true
-    this.tryToConnect(this.connection)
+    this._connection.port = new SerialPort({path, baudRate, autoOpen: false})
+    const {port} = this._connection
+    port.on('data', this._onDataReceived)
+    port.on('error', (e) => this.logService.error(e.message));
+    this._connection.reconnect = true
+    this._tryToConnect(this._connection)
   }
 
-  private tryToConnect({port, reconnect}: IConnection) {
+  private _onDataReceived = (data: Buffer) => { // callback
+    this.buffer.push(...data)
+  }
+
+  private _tryToConnect({port, reconnect}: IConnection) {
     if (!reconnect) return;
-    setTimeout(() => {this.tryToConnect(this.connection)}, 1000)
+    setTimeout(() => {this._tryToConnect(this._connection)}, 1000)
     if (!port?.isOpen) port?.open((e) => {
-      if (e) this.addError(e.message)
+      if (e) this.logService.error(e.message)
+      else this.logService.log(`Connected to ${port.path} (${port.baudRate})`)
     })
   }
 
-  sendData(data: Array<number>): Promise<boolean> {
-    const {port} = this.connection
+  sendData(data: number[]): Promise<boolean> {
+    const {port} = this._connection
     return new Promise((resolve, reject) => {
       if (!port?.isOpen) reject(new Error('Not connected to the port'))
       port?.write(data, (e) => {
         if (e) reject(e)
+        this.logService.log(`Data sent: ${data}`)
         resolve(true)
       })
     })
