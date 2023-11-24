@@ -4,5 +4,6 @@ export class ProtocolSettingsDto {
   readonly cycleRequestFreq: number;
   readonly channelsTypes: string[];
   readonly responseValuesForEachChannel: number;
+  readonly littleEndian: boolean;
   readonly newSession: boolean
 }

@@ -27,7 +27,8 @@ export class ProtocolService {
 
   setSettings(dto: ProtocolSettingsDto) {
     const {newSession} = this.settingsService.set(dto)
-    const {channelsTypes} = this.settingsService.current
+    const {channelsTypes, littleEndian} = this.settingsService.current
+    this.channelService.setLittleEndian(littleEndian)
     if (newSession) this.channelService.init(channelsTypes)
     return {...this.settingsService.current, newSession}
   }

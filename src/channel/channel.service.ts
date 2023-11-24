@@ -53,4 +53,8 @@ export class ChannelService {
     }
     return res
   }
+
+  setLittleEndian(value: boolean) {
+    this.parserService.littleEndian = value
+  }
 }

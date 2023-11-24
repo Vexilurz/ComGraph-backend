@@ -10,6 +10,7 @@ export interface ISettings {
   channelsTypes: string[];
   responseValuesForEachChannel: number;
   expectedLength: number;
+  littleEndian: boolean;
 }
 
 @Injectable()
@@ -22,13 +23,21 @@ export class SettingsService {
     cycleRequestFreq: 500,
     channelsTypes: [],
     responseValuesForEachChannel: 1,
-    expectedLength: 0
+    expectedLength: 0,
+    littleEndian: false
   }
 
   get = () => this.current
 
   set(dto: ProtocolSettingsDto) {
-    const {command, timeout, cycleRequestFreq, channelsTypes, responseValuesForEachChannel} = dto
+    const {
+      command,
+      timeout,
+      cycleRequestFreq,
+      channelsTypes,
+      responseValuesForEachChannel,
+      littleEndian
+    } = dto
     let {newSession} = dto
     let needToRecalcExpectedLength = false
 
@@ -65,6 +74,8 @@ export class SettingsService {
         .reduce((acc, val) => acc + val, 0)
       this.current.expectedLength = length * this.current.responseValuesForEachChannel
     }
+
+    this.current.littleEndian = littleEndian
 
     return {newSession}
   }
