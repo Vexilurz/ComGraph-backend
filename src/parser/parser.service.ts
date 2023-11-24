@@ -33,16 +33,19 @@ export class ParserService {
   }
 
   private _getInt24(arr: Uint8Array, littleEndian: boolean, sign: boolean): number {
-    const dataView = new DataView(this._addExtraByte(arr, littleEndian).buffer);
-    console.log('dv: ', dataView)
-    if (sign) return dataView.getInt32(0, littleEndian)// >> 8
-    else return dataView.getUint32(0, littleEndian)// >> 8
+    const dataView = new DataView(this._addExtraByte(arr, littleEndian, sign).buffer)
+    return dataView.getInt32(0, littleEndian)
   }
 
-  private _addExtraByte(arr: Uint8Array, littleEndian: boolean): Uint8Array {
+  private _addExtraByte(arr: Uint8Array, littleEndian: boolean, sign: boolean): Uint8Array {
     const extendedArray = new Uint8Array(4);
     const offset = littleEndian ? 0 : 1
     extendedArray.set(arr, offset)
+    if (sign) {
+      const index = littleEndian ? 3 : 0
+      const indexToCheck = littleEndian ? 2 : 1
+      extendedArray[index] = (extendedArray[indexToCheck] & 0x80) > 0 ? 0xFF : 0x00
+    }
     return extendedArray
   }
 }
