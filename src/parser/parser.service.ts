@@ -34,8 +34,9 @@ export class ParserService {
 
   private _getInt24(arr: Uint8Array, littleEndian: boolean, sign: boolean): number {
     const dataView = new DataView(this._addExtraByte(arr, littleEndian).buffer);
-    if (sign) return dataView.getInt32(0, littleEndian) >> 8
-    else return dataView.getUint32(0, littleEndian) >> 8
+    console.log('dv: ', dataView)
+    if (sign) return dataView.getInt32(0, littleEndian)// >> 8
+    else return dataView.getUint32(0, littleEndian)// >> 8
   }
 
   private _addExtraByte(arr: Uint8Array, littleEndian: boolean): Uint8Array {
