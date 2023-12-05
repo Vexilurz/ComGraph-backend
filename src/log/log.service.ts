@@ -1,18 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import {ApiProperty} from "@nestjs/swagger";
 
-export interface Message {
+export class Message {
+  @ApiProperty({example: 1, description: 'ID of message'})
   id: number;
+
+  @ApiProperty({example: 'Connected to COM2 (115200)', description: 'Message'})
   message: string;
+
+  @ApiProperty({example: '2023-12-05T10:10:18.643Z', description: 'Date of message'})
   date: string;
 }
 
-interface MessageDTO {
+class MessageDTO {
   message: string;
   array: Message[];
 }
 
-export interface LogReport {
-  log: Message[],
+export class LogReport {
+  log: Message[];
   errors: Message[]
 }
 
