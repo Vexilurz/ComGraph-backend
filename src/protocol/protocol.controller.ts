@@ -32,7 +32,7 @@ export class ProtocolController {
 
   @ApiOperation({summary: 'Start or stop cycle request'})
   @ApiResponse({status: 200, type: String})
-  @ApiQuery({name: 'enable', type: String, example: 'true | false',
+  @ApiQuery({name: 'enable', type: Boolean, example: 'true | false',
     description: 'Enable or disable cycle request'})
   @Post('/cycle?')
   async cycleRequest(@Query('enable') enable: string) {
