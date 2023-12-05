@@ -3,6 +3,7 @@ import {PortSettingsDto} from "./dto/port-settings.dto";
 import {SerialPort} from 'serialport';
 import {LogService} from "../log/log.service";
 import {RawDataDto} from "./dto/raw-data.dto";
+import {PortStatusDto} from "../status/dto/port-status.dto";
 
 interface IConnection {
   port: SerialPort,
@@ -27,14 +28,14 @@ export class PortService {
     return await SerialPort.list()
   }
 
-  getStatus() {
+  getStatus(): PortStatusDto {
     const {port, reconnect} = this._connection
-    return {
-      path: port?.path,
-      baudRate: port?.baudRate,
-      isOpen: port?.isOpen,
-      reconnect
-    }
+    const status = new PortStatusDto()
+    status.path = port?.path
+    status.baudRate = port?.baudRate
+    status.isOpen = port?.isOpen
+    status.reconnect = reconnect
+    return status
   }
 
   disconnect() {

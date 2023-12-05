@@ -1,5 +1,5 @@
 import {Controller, Get} from '@nestjs/common';
-import {StatusService} from "./status.service";
+import {Status, StatusService} from "./status.service";
 import {ApiOperation, ApiResponse, ApiTags} from "@nestjs/swagger";
 
 @ApiTags('Status')
@@ -9,7 +9,7 @@ export class StatusController {
   }
 
   @ApiOperation({summary: 'Get status'})
-  @ApiResponse({status: 200, type: [Array<number>]})
+  @ApiResponse({status: 200, type: Status})
   @Get('/')
   getStatus() {
     return this.statusService.getStatus()

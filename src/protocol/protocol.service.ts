@@ -5,6 +5,7 @@ import {LogService} from "../log/log.service";
 import {waitUntil} from "../shared/lib/waitUntil";
 import {SettingsService} from "./settings/settings.service";
 import {ChannelService} from "../channel/channel.service";
+import {ProtocolStatusDto} from "../status/dto/protocol-status.dto";
 
 @Injectable()
 export class ProtocolService {
@@ -17,7 +18,7 @@ export class ProtocolService {
 
   private _cycle = {enable: false}
 
-  getStatus() {
+  getStatus(): ProtocolStatusDto {
     return {
       settings: this.settingsService.current,
       cycle: this._cycle.enable,
