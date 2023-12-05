@@ -2,6 +2,7 @@ import {Injectable} from '@nestjs/common';
 import {PortSettingsDto} from "./dto/port-settings.dto";
 import {SerialPort} from 'serialport';
 import {LogService} from "../log/log.service";
+import {RawDataDto} from "./dto/rawData.dto";
 
 interface IConnection {
   port: SerialPort,
@@ -80,10 +81,10 @@ export class PortService {
     })
   }
 
-  getRaw() {
+  getRaw(): RawDataDto {
     const res = {
-      raw: this.buffer,
-      string: String.fromCharCode(...this.buffer)
+      text: String.fromCharCode(...this.buffer),
+      raw: this.buffer
     }
     this.buffer = []
     return res
