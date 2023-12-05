@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {PortService} from "../port/port.service";
 import {ProtocolService} from "../protocol/protocol.service";
 import {LogService} from "../log/log.service";
+import {getVersion} from "../shared/lib/packageJsonParser";
 
 @Injectable()
 export class StatusService {
@@ -12,7 +13,7 @@ export class StatusService {
   ) {}
 
   private _info = {
-    version: '1.0.0'
+    version: getVersion()
   }
 
   getStatus() {
