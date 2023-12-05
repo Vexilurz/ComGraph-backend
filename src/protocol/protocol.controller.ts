@@ -32,7 +32,7 @@ export class ProtocolController {
 
   @ApiOperation({summary: 'Start or stop cycle request'})
   @ApiResponse({status: 200, type: String})
-  @ApiQuery({name: 'enable', type: String, example: 'true | false',
+  @ApiQuery({name: 'enable', type: Boolean, example: 'true | false',
     description: 'Enable or disable cycle request'})
   @Post('/cycle?')
   async cycleRequest(@Query('enable') enable: string) {
@@ -40,6 +40,24 @@ export class ProtocolController {
     try {
       await this.protocolService.setCycleRequest(en)
       return `Cycle request ${en ? 'started' : 'stopped'}.`
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
+
+  @ApiOperation({summary: 'Get session data'})
+  @ApiResponse({status: 200, type: [Array<number>]})
+  @ApiQuery({name: 'start', type: Number, example: 0,
+    description: 'Start index of session data array'})
+  @ApiQuery({name: 'end', type: Number, example: 1,
+    description: 'End index of session data array'})
+  @Get('/data?')
+  getData(
+    @Query('start') start?: number,
+    @Query('end') end?: number
+  ) {
+    try {
+      return this.protocolService.getData(start, end)
     } catch (e) {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
