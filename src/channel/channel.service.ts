@@ -46,7 +46,7 @@ export class ChannelService {
     if (data.length > 0) throw new Error(`Extra bytes in buffer: ${data.length}`)
   }
 
-  private _getChannelPoints(start: number, end?: number) {
+  getChannelPoints(start?: number, end?: number) {
     const res = []
     for (let i = 0; i < this.channels.length; i++) {
       const channel = this.channels[i]
@@ -56,21 +56,7 @@ export class ChannelService {
   }
 
   getLastChannelPoints(count: number) {
-    return this._getChannelPoints(-count)
-  }
-
-  getChannelPoints(from: number, count: number) {
-    return this._getChannelPoints(from, from + count - 1)
-  }
-
-  getNextChannelPoints(count: number) {
-    const res = this._getChannelPoints(this._pointer, this._pointer + count - 1)
-    this._pointer += count
-    return res
-  }
-
-  setPointer(value: number) {
-    this._pointer = value
+    return this.getChannelPoints(-count)
   }
 
   setLittleEndian(value: boolean) {
