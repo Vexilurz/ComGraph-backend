@@ -15,6 +15,7 @@ export class ChannelService {
   ) {}
 
   channels: IChannel[] = []
+  private _pointer: number = 0
 
   init(channelTypes: string[]) {
     this.channels = channelTypes.map((typeName) => this._getNew(typeName))
@@ -45,13 +46,31 @@ export class ChannelService {
     if (data.length > 0) throw new Error(`Extra bytes in buffer: ${data.length}`)
   }
 
-  getLastChannelPoints(count: number) {
+  private _getChannelPoints(start: number, end?: number) {
     const res = []
     for (let i = 0; i < this.channels.length; i++) {
       const channel = this.channels[i]
-      res.push(channel.data.slice(-count))
+      res.push(channel.data.slice(start, end))
     }
     return res
+  }
+
+  getLastChannelPoints(count: number) {
+    return this._getChannelPoints(-count)
+  }
+
+  getChannelPoints(from: number, count: number) {
+    return this._getChannelPoints(from, from + count - 1)
+  }
+
+  getNextChannelPoints(count: number) {
+    const res = this._getChannelPoints(this._pointer, this._pointer + count - 1)
+    this._pointer += count
+    return res
+  }
+
+  setPointer(value: number) {
+    this._pointer = value
   }
 
   setLittleEndian(value: boolean) {
