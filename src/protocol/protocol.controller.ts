@@ -1,11 +1,15 @@
 import {Body, Controller, Get, HttpException, HttpStatus, Post, Query} from '@nestjs/common';
 import {ProtocolService} from "./protocol.service";
 import {ProtocolSettingsDto} from "./dto/protocol-settings.dto";
+import {ApiOperation, ApiQuery, ApiResponse, ApiTags} from "@nestjs/swagger";
 
+@ApiTags('Protocol')
 @Controller('/protocol')
 export class ProtocolController {
   constructor(private protocolService: ProtocolService) {}
 
+  @ApiOperation({summary: 'Set protocol settings'})
+  @ApiResponse({status: 200, type: ProtocolSettingsDto})
   @Post('/settings')
   settings(@Body() dto: ProtocolSettingsDto) {
     try {
@@ -15,6 +19,8 @@ export class ProtocolController {
     }
   }
 
+  @ApiOperation({summary: 'Send command and wait for response once time'})
+  @ApiResponse({status: 200, type: [Array<number>]})
   @Get('/once')
   async getOnce() {
     try {
@@ -24,6 +30,10 @@ export class ProtocolController {
     }
   }
 
+  @ApiOperation({summary: 'Start or stop cycle request'})
+  @ApiResponse({status: 200, type: String})
+  @ApiQuery({name: 'enable', type: String, example: 'true | false',
+    description: 'Enable or disable cycle request'})
   @Post('/cycle?')
   async cycleRequest(@Query('enable') enable: string) {
     const en = enable === 'true'

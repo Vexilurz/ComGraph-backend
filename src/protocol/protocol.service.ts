@@ -25,12 +25,12 @@ export class ProtocolService {
     }
   }
 
-  setSettings(dto: ProtocolSettingsDto) {
-    const {newSession} = this.settingsService.set(dto)
-    const {channelsTypes, littleEndian} = this.settingsService.current
+  setSettings(dto: ProtocolSettingsDto): ProtocolSettingsDto {
+    this.settingsService.set(dto)
+    const {channelsTypes, littleEndian, newSession} = this.settingsService.current
     this.channelService.setLittleEndian(littleEndian)
     if (newSession) this.channelService.init(channelsTypes)
-    return {...this.settingsService.current, newSession}
+    return this.settingsService.current
   }
 
   private async _sendRequest() {
@@ -75,7 +75,7 @@ export class ProtocolService {
         throw new Error('There are some errors occurred. See log for details...')
       }
     } else { // stop
-      if (!this._cycle.enable) throw new Error('Cycle request not running.')
+      if (!this._cycle.enable) throw new Error('Cycle request is not running.')
       this._cycle.enable = false
     }
   }

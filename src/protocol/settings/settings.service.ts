@@ -3,21 +3,11 @@ import {ProtocolSettingsDto} from "../dto/protocol-settings.dto";
 import {areArraysIdentical} from "../../shared/lib/areArraysIdentical";
 import {NumbersService} from "../../numbers/numbers.service";
 
-export interface ISettings {
-  command: number;
-  timeout: number;
-  cycleRequestFreq: number;
-  channelsTypes: string[];
-  responseValuesForEachChannel: number;
-  expectedLength: number;
-  littleEndian: boolean;
-}
-
 @Injectable()
 export class SettingsService {
   constructor(private numbersService: NumbersService) {}
 
-  readonly current: ISettings = {
+  readonly current: ProtocolSettingsDto = {
     command: 0,
     timeout: 3000,
     cycleRequestFreq: 500,
@@ -77,6 +67,6 @@ export class SettingsService {
 
     this.current.littleEndian = littleEndian
 
-    return {newSession}
+    this.current.newSession = newSession
   }
 }

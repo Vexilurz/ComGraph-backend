@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import {ApiProperty} from "@nestjs/swagger";
 
 export enum NumberKind {
   Int32 = 'Int32',
@@ -12,8 +13,11 @@ export enum NumberKind {
   Float32 = 'Float32'
 }
 
-export interface NumberType {
+export class NumberType {
+  @ApiProperty({example: 'Int32', description: 'Type name'})
   kind: NumberKind;
+
+  @ApiProperty({example: 4, description: 'Length of number in bytes'})
   length: number
 }
 

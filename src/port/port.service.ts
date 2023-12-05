@@ -2,7 +2,7 @@ import {Injectable} from '@nestjs/common';
 import {PortSettingsDto} from "./dto/port-settings.dto";
 import {SerialPort} from 'serialport';
 import {LogService} from "../log/log.service";
-import {RawDataDto} from "./dto/rawData.dto";
+import {RawDataDto} from "./dto/raw-data.dto";
 
 interface IConnection {
   port: SerialPort,

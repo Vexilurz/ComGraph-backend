@@ -2,7 +2,7 @@ import {Body, Controller, Get, HttpException, HttpStatus, Post} from '@nestjs/co
 import {PortService} from "./port.service";
 import {PortSettingsDto} from "./dto/port-settings.dto";
 import {ApiOperation, ApiProperty, ApiResponse, ApiTags} from "@nestjs/swagger";
-import {RawDataDto} from "./dto/rawData.dto";
+import {RawDataDto} from "./dto/raw-data.dto";
 
 class PortInfo {
   @ApiProperty({example: 'COM1', description: 'Port name'})
