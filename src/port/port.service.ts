@@ -79,4 +79,13 @@ export class PortService {
       })
     })
   }
+
+  getRaw() {
+    const res = {
+      raw: this.buffer,
+      string: String.fromCharCode(...this.buffer)
+    }
+    this.buffer = []
+    return res
+  }
 }

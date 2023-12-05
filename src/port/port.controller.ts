@@ -34,4 +34,9 @@ export class PortController {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+
+  @Get('/raw')
+  getRaw() {
+    return this.portsService.getRaw()
+  }
 }
