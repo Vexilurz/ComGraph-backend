@@ -4,7 +4,7 @@ import { ProtocolController } from './protocol.controller';
 import {PortModule} from "../port/port.module";
 import {LogModule} from "../log/log.module";
 import { SettingsModule } from './settings/settings.module';
-import {ChannelModule} from "../channel/channel.module";
+import {DataModule} from "../data/data.module";
 
 @Module({
   providers: [ProtocolService],
@@ -13,7 +13,7 @@ import {ChannelModule} from "../channel/channel.module";
   imports: [
     SettingsModule,
     PortModule,
-    ChannelModule,
+    DataModule,
     LogModule,
   ]
 })

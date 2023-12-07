@@ -7,7 +7,7 @@ import {ApiOperation, ApiResponse, ApiTags} from "@nestjs/swagger";
 export class NumbersController {
   constructor(private numbersService: NumbersService) {}
 
-  @ApiOperation({summary: 'Get a list of supported channel types'})
+  @ApiOperation({summary: 'Get a list of supported data types'})
   @ApiResponse({status: 200, type: [NumberType]})
   @Get('/supported')
   getSupported() {

@@ -5,7 +5,7 @@ import {ServeStaticModule} from "@nestjs/serve-static";
 import { ProtocolModule } from './protocol/protocol.module';
 import { StatusModule } from './status/status.module';
 import { LogModule } from './log/log.module';
-import { ChannelModule } from './channel/channel.module';
+import { DataModule } from './data/data.module';
 import { ParserModule } from './parser/parser.module';
 import { NumbersModule } from './numbers/numbers.module';
 import * as path from 'path';
@@ -24,7 +24,7 @@ import * as path from 'path';
     ProtocolModule,
     StatusModule,
     LogModule,
-    ChannelModule,
+    DataModule,
     ParserModule,
     NumbersModule
   ]

@@ -4,7 +4,7 @@ import {PortService} from "../port/port.service";
 import {LogService} from "../log/log.service";
 import {waitUntil} from "../shared/lib/waitUntil";
 import {SettingsService} from "./settings/settings.service";
-import {ChannelService} from "../channel/channel.service";
+import {DataService} from "../data/data.service";
 import {ProtocolStatusDto} from "../status/dto/protocol-status.dto";
 
 @Injectable()
@@ -12,7 +12,7 @@ export class ProtocolService {
   constructor(
     private settingsService: SettingsService,
     private portService: PortService,
-    private channelService: ChannelService,
+    private dataService: DataService,
     private logService: LogService
   ) {}
 
@@ -22,15 +22,15 @@ export class ProtocolService {
     return {
       settings: this.settingsService.current,
       cycle: this._cycle.enable,
-      sessionLength: this.channelService.getSessionLength()
+      sessionLength: this.dataService.getSessionLength()
     }
   }
 
   setSettings(dto: ProtocolSettingsDto): ProtocolSettingsDto {
     this.settingsService.set(dto)
     const {channelsTypes, littleEndian, newSession} = this.settingsService.current
-    this.channelService.setLittleEndian(littleEndian)
-    if (newSession) this.channelService.init(channelsTypes)
+    this.dataService.setLittleEndian(littleEndian)
+    if (newSession) this.dataService.init(channelsTypes)
     return this.settingsService.current
   }
 
@@ -42,7 +42,7 @@ export class ProtocolService {
   async getOnce() {
     await this._oneRequest()
     const {responseValuesForEachChannel} = this.settingsService.current
-    return this.channelService.getLastChannelPoints(responseValuesForEachChannel)
+    return this.dataService.getLastChannelPoints(responseValuesForEachChannel)
   }
 
   private async _oneRequest() {
@@ -61,8 +61,8 @@ export class ProtocolService {
         throw new Error(`Timeout. Expected length ${expectedLength}, but received only ${getLen()}.`)
       else throw e
     }
-    await this.channelService.parseData(this.portService.buffer, responseValuesForEachChannel)
-    this.logService.log(`sessionLength: ${this.channelService.getSessionLength()}`)
+    await this.dataService.parseData(this.portService.buffer, responseValuesForEachChannel)
+    this.logService.log(`sessionLength: ${this.dataService.getSessionLength()}`)
   }
 
   async setCycleRequest(enable: boolean) {
@@ -98,6 +98,6 @@ export class ProtocolService {
   }
 
   getData(start?: number, end?: number) {
-    return this.channelService.getChannelPoints(start, end)
+    return this.dataService.getChannelPoints(start, end)
   }
 }

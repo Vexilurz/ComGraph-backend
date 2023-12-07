@@ -8,14 +8,13 @@ export interface IChannel {
 }
 
 @Injectable()
-export class ChannelService {
+export class DataService {
   constructor(
     private parserService: ParserService,
     private numbersService: NumbersService
   ) {}
 
   channels: IChannel[] = []
-  private _pointer: number = 0
 
   init(channelTypes: string[]) {
     this.channels = channelTypes.map((typeName) => this._getNew(typeName))
