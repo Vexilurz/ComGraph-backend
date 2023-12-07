@@ -44,22 +44,4 @@ export class ProtocolController {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
-
-  @ApiOperation({summary: 'Get session data'})
-  @ApiResponse({status: 200, type: [Array<number>]})
-  @ApiQuery({name: 'start', type: Number, example: 0,
-    description: 'Start index of session data array', required: false})
-  @ApiQuery({name: 'end', type: Number, example: 1,
-    description: 'End index of session data array', required: false})
-  @Get('/data?')
-  getData(
-    @Query('start') start?: number,
-    @Query('end') end?: number
-  ) {
-    try {
-      return this.protocolService.getData(start, end)
-    } catch (e) {
-      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
 }

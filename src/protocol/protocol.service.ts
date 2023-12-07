@@ -96,8 +96,4 @@ export class ProtocolService {
       this.logService.error(e.message)
     }
   }
-
-  getData(start?: number, end?: number) {
-    return this.dataService.getChannelPoints(start, end)
-  }
 }
