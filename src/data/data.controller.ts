@@ -24,4 +24,15 @@ export class DataController {
       throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
+
+  @ApiOperation({summary: 'Save session data to file'})
+  @ApiResponse({status: 200, type: String})
+  @Get('/save')
+  saveData() {
+    try {
+      return this.dataService.saveSession()
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {ParserService} from "../parser/parser.service";
 import {NumbersService, NumberType} from "../numbers/numbers.service";
+import {FilesService} from "../files/files.service";
 
 export interface IChannel {
   type: NumberType;
@@ -11,7 +12,8 @@ export interface IChannel {
 export class DataService {
   constructor(
     private parserService: ParserService,
-    private numbersService: NumbersService
+    private numbersService: NumbersService,
+    private filesService: FilesService
   ) {}
 
   channels: IChannel[] = []
@@ -60,5 +62,10 @@ export class DataService {
 
   setLittleEndian(value: boolean) {
     this.parserService.littleEndian = value
+  }
+
+  async saveSession() {
+    const data = this.channels.map((ch) => ch.data)
+    return await this.filesService.saveFile(data)
   }
 }
