@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {ApiProperty} from "@nestjs/swagger";
+import {ChannelSettingsDto} from "../protocol/dto/channel-settings.dto";
 
 export enum NumberKind {
   Int32 = 'Int32',
@@ -45,13 +46,14 @@ export class NumbersService {
     return this.numberTypes
   }
 
-  getFromString(kind: string): NumberType {
-    const res = this.numberTypes.find(value => value.kind == kind)
-    if (!res) throw new Error(`Can't find number type '${kind}'`)
+  getFromChannelDTO(channelDTO: ChannelSettingsDto): NumberType {
+    if (!channelDTO.name || !channelDTO.type) throw new Error(`Channels must be declared like {name: 'Ch1', type: 'Int32'}`)
+    const res = this.numberTypes.find(value => value.kind == channelDTO.type)
+    if (!res) throw new Error(`Can't find number type '${channelDTO.type}' of channel '${channelDTO.name}'`)
     return res
   }
 
-  getLength(kind: string): number {
-    return this.getFromString(kind).length
+  getLength(channelDTO: ChannelSettingsDto): number {
+    return this.getFromChannelDTO(channelDTO).length
   }
 }

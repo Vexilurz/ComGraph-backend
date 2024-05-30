@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import {ParserService} from "../parser/parser.service";
 import {NumbersService, NumberType} from "../numbers/numbers.service";
 import {FilesService} from "../files/files.service";
+import {ChannelSettingsDto} from "../protocol/dto/channel-settings.dto";
 
 export interface IChannel {
+  name: string;
   type: NumberType;
   data: number[]
 }
@@ -18,13 +20,14 @@ export class DataService {
 
   channels: IChannel[] = []
 
-  init(channelTypes: string[]) {
-    this.channels = channelTypes.map((typeName) => this._getNew(typeName))
+  init(channelTypes: ChannelSettingsDto[]) {
+    this.channels = channelTypes.map((channelDTO) => this._getNew(channelDTO))
   }
 
-  private _getNew(typeName: string): IChannel {
+  private _getNew(channelDTO: ChannelSettingsDto): IChannel {
     return {
-      type: this.numbersService.getFromString(typeName),
+      name: channelDTO.name,
+      type: this.numbersService.getFromChannelDTO(channelDTO),
       data: []
     }
   }
@@ -36,7 +39,7 @@ export class DataService {
   async parseData(data: number[], pointsCount: number) { // TODO: неудачное название аргумента
     for (let j = 0; j < pointsCount; j++) {
       for (let i = 0; i < this.channels.length; i++) {
-        const channel = this.channels[i]
+        const channel = this.channels[i] // TODO: сначала буферизнуть, проверить нет ли ошибок в конце, и только потом сложить сюды
         const {length} = channel.type
         if (data.length < length)
           throw new Error(`Parse error. Buffer: [${data}]; need ${length} bytes. (p${j},ch${i})`)
@@ -45,6 +48,7 @@ export class DataService {
       }
     }
     if (data.length > 0) throw new Error(`Extra bytes in buffer: ${data.length}`)
+    // TODO: не ложить ничего в каналы, если чего то нехватает или лишку!!!
   }
 
   getChannelPoints(start?: number, end?: number) {
@@ -65,7 +69,8 @@ export class DataService {
   }
 
   async saveSession() {
+    const names = this.channels.map(ch => ch.name).join(';')
     const data = this.channels.map((ch) => ch.data)
-    return await this.filesService.saveFile(data)
+    return await this.filesService.saveFile(names, data)
   }
 }

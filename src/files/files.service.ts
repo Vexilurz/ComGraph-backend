@@ -4,7 +4,7 @@ import * as path from 'path';
 
 @Injectable()
 export class FilesService {
-  async saveFile(data: Array<Array<number>>): Promise<string> {
+  async saveFile(names: string, data: Array<Array<number>>): Promise<string> {
     const date = (new Date(Date.now())).toISOString().replace(/[-:T.]/g, '_');
     const fileName = `ComGraph_${date}.csv`;
     const filePath = path.resolve(__dirname, '..', 'static')
@@ -13,7 +13,7 @@ export class FilesService {
       fs.mkdirSync(filePath, {recursive: true})
     }
     const buf = await new Promise<string>((res, rej) => {
-      let s = ''
+      let s = names + '\n'
       for (let i = 0; i < data[0].length; i++) {
         for (let j = 0; j < data.length; j++) {
           s += data[j][i].toString()
